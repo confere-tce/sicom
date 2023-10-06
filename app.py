@@ -1,5 +1,4 @@
 import os
-import csv
 import pandas as pd
 from funcoes import criar_pasta_usuario, deletando_pasta
 from flask import Flask, render_template, request, url_for, redirect
@@ -14,6 +13,7 @@ engine = create_engine('postgresql://jsmcfbqq:dzYLD0UV56ksursrQrP4fHMi_f1X116e@s
 
 if not os.path.exists(app.config['UPLOAD_FOLDER']):
     os.makedirs(app.config['UPLOAD_FOLDER'])
+
 
 @app.route('/') 
 def index():
@@ -92,9 +92,8 @@ def upload_file():
 
                     arq_completo = os.path.join(pasta_usuario, arq)
 
-    
-                     # Carregar o arquivo CSV em um DataFrame do Pandas
-                    df = pd.read_csv(arq_completo, delimiter=';', encoding='iso-8859-1', header=None, names=nomes_colunas, dtype=dtypes)
+                    # Carregar o arquivo CSV em um DataFrame do Pandas
+                    df = pd.read_csv(arq_completo, delimiter=';', encoding='latin-1', header=None, names=nomes_colunas, dtype=dtypes)
 
                     # Preencher com None para completar até 30 colunas
                     df = df.reindex(columns=[*df.columns, *range(30 - len(df.columns))])
@@ -109,14 +108,20 @@ def upload_file():
                     df.insert(0, 'modulo', 'AM')  
                     df.insert(0, 'usuario', 'USUARIO')  
 
-                    print(df)
-
                     df.to_sql('tce_sicom', engine, if_exists='append', index=False)
+
 
         # Deletando a pasta depois do processamento
         deletando_pasta(pasta_usuario)
 
-        return "Arquivo " + file.filename + " importado com Sucesso"
+        return redirect(url_for("resultado"))
+    
+    
+@app.route('/resultado') 
+def resultado():
+    return render_template("resultado.html")
+
+
 
 if __name__ == '__main__':
     app.run(debug=True)
