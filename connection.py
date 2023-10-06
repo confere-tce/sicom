@@ -1,10 +1,14 @@
 import psycopg2
 
 conn = psycopg2.connect(
-    dbname="jsmcfbqq",
-    user="jsmcfbqq",
-    password="dzYLD0UV56ksursrQrP4fHMi_f1X116e",
-    host="silly.db.elephantsql.com"
+    dbname="uberabpm",
+    user="uberabpm",
+    password="SICSADM",
+    host="34.86.191.201"
+    # dbname="jsmcfbqq",
+    # user="jsmcfbqq",
+    # password="dzYLD0UV56ksursrQrP4fHMi_f1X116e",
+    # host="silly.db.elephantsql.com"
 )
 
 def delete(usuario):
