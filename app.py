@@ -109,7 +109,7 @@ def upload_file():
 
                     df.insert(0, 'arquivo', nome_arquivo) 
                     df.insert(0, 'modulo', 'AM')  
-                    df.insert(0, 'usuario', 'USUARIO')  
+                    df.insert(0, 'usuario', usuario)  
 
                     df.to_sql('tce_sicom', engine, if_exists='append', index=False)
 
