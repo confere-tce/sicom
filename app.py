@@ -1,10 +1,12 @@
 import os
+import connection
 import pandas as pd
 from funcoes import criar_pasta_usuario, deletando_pasta
 from flask import Flask, render_template, request, url_for, redirect
 from zipfile import ZipFile
 from sqlalchemy import create_engine
-import connection
+from relatorios import RelatorioAnaliticoEmpenho
+
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'uploads'
@@ -117,12 +119,12 @@ def upload_file():
 
         return redirect(url_for("resultado"))
     
-    
-@app.route('/resultado') 
+@app.route('/resultado')
 def resultado():
-    return render_template("resultado.html")
+    # Obtém os dados da função de consulta
+    dados = RelatorioAnaliticoEmpenho()
 
-
+    return render_template('resultado.html', dados=dados)    
 
 if __name__ == '__main__':
     app.run(debug=True)

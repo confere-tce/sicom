@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Consulta SQL</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+
+        h1 {
+            color: blue;
+            margin-bottom: 20px;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 7px;
+            text-align: right;
+        }
+
+        th {
+            background-color: #f0f0f0;
+            font-weight: bold;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>Resultados da Consulta</h1>
+
+    <table>
+        <thead>
+            <tr>
+                <th>EMPENHO</th>
+                <th>FONTERECURSO</th>
+                <th>CO</th>
+                <th>EMPENHADO</th>
+                <th>ANULEMPENHADO</th>
+                <th>LIQUIDADO</th>
+                <th>ANULIQUIDADO</th>
+                <th>PAGO</th>
+                <th>ANULPAGO</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% set total_empenhado = 0 %}
+            {% set total_anulempenhado = 0 %}
+            {% set total_liquidado = 0 %}
+            {% set total_anuliquidado = 0 %}
+            {% set total_pago = 0 %}
+            {% set total_anulpago = 0 %}
+            {% for dado in dados %}
+                <tr>
+                    <td>{{ dado[0] }}</td>
+                    <td>{{ dado[1] }}</td>
+                    <td>{{ dado[2] }}</td>
+                    <td>{{ "{:,.2f}".format(dado[3]).replace(',', '|').replace('.', ',').replace('|', '.') }}</td>
+                    <td>{{ "{:,.2f}".format(dado[4]).replace(',', '|').replace('.', ',').replace('|', '.') }}</td>
+                    <td>{{ "{:,.2f}".format(dado[5]).replace(',', '|').replace('.', ',').replace('|', '.') }}</td>
+                    <td>{{ "{:,.2f}".format(dado[6]).replace(',', '|').replace('.', ',').replace('|', '.') }}</td>
+                    <td>{{ "{:,.2f}".format(dado[7]).replace(',', '|').replace('.', ',').replace('|', '.') }}</td>
+                    <td>{{ "{:,.2f}".format(dado[8]).replace(',', '|').replace('.', ',').replace('|', '.') }}</td>
+                </tr>
+                {% set total_empenhado = total_empenhado + dado[3] %}
+                {% set total_anulempenhado = total_anulempenhado + dado[4] %}
+                {% set total_liquidado = total_liquidado + dado[5] %}
+                {% set total_anuliquidado = total_anuliquidado + dado[6] %}
+                {% set total_pago = total_pago + dado[7] %}
+                {% set total_anulpago = total_anulpago + dado[8] %}
+            {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="3">Total</td>
+                <td>{{ "{:,.2f}".format(total_empenhado).replace(',', '|').replace('.', ',').replace('|', '.') }}</td>
+                <td>{{ "{:,.2f}".format(total_anulempenhado).replace(',', '|').replace('.', ',').replace('|', '.') }}</td>
+                <td>{{ "{:,.2f}".format(total_liquidado).replace(',', '|').replace('.', ',').replace('|', '.') }}</td>
+                <td>{{ "{:,.2f}".format(total_anuliquidado).replace(',', '|').replace('.', ',').replace('|', '.') }}</td>
+                <td>{{ "{:,.2f}".format(total_pago).replace(',', '|').replace('.', ',').replace('|', '.') }}</td>
+                <td>{{ "{:,.2f}".format(total_anulpago).replace(',', '|').replace('.', ',').replace('|', '.') }}</td>
+            </tr>
+        </tfoot>
+    </table>
+</body>
+
+</html>
