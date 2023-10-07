@@ -5,7 +5,7 @@ from funcoes import criar_pasta_usuario, deletando_pasta
 from flask import Flask, render_template, request, url_for, redirect
 from zipfile import ZipFile
 from sqlalchemy import create_engine 
-from relatorios import relatorioAnaliticoEmpenho, totalizaMovimentosPorFonte, movimentosEmpenhoPorFonte
+from relatorios import relatorioAnaliticoEmpenho, totalizaMovimentosPorFonte, movimentosEmpenhoPorFonte, diarioDespesa
 
 
 app = Flask(__name__)
@@ -88,7 +88,8 @@ def upload_file():
                    nome_arquivo == 'OBELAC' or \
                    nome_arquivo == 'OPS' or \
                    nome_arquivo == 'ORGAO' or \
-                   nome_arquivo == 'REC':
+                   nome_arquivo == 'REC' or \
+                   nome_arquivo == 'RSP':
                        processa = True
 
                 if processa:
@@ -125,8 +126,9 @@ def resultado(usuario):
     dados = relatorioAnaliticoEmpenho(usuario)
     fontes = totalizaMovimentosPorFonte(usuario)
     empenhos = movimentosEmpenhoPorFonte(usuario)
+    diarios = diarioDespesa(usuario)
 
-    return render_template('resultado.html', dados=dados, fontes=fontes, empenhos=empenhos)    
+    return render_template('resultado.html', dados=dados, fontes=fontes, empenhos=empenhos, diarios = diarios)    
 
 if __name__ == '__main__':
     app.run(debug=True)
