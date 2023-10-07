@@ -1,7 +1,7 @@
 import os 
 import connection 
 import pandas as pd 
-from funcoes import criar_pasta_usuario, deletando_pasta
+from funcoes import criar_pasta_usuario, deletando_pasta 
 from flask import Flask, render_template, request, url_for, redirect
 from zipfile import ZipFile
 from sqlalchemy import create_engine 
@@ -117,14 +117,14 @@ def upload_file():
         # Deletando a pasta depois do processamento
         deletando_pasta(pasta_usuario)
 
-        return redirect(url_for("resultado"))
+        return redirect(url_for("resultado", usuario=usuario))
     
-@app.route('/resultado')
-def resultado():
+@app.route('//resultado/<usuario>')
+def resultado(usuario):
     # Obtém os dados da função de consulta
-    dados = relatorioAnaliticoEmpenho()
-    fontes = totalizaMovimentosPorFonte()
-    empenhos = movimentosEmpenhoPorFonte()
+    dados = relatorioAnaliticoEmpenho(usuario)
+    fontes = totalizaMovimentosPorFonte(usuario)
+    empenhos = movimentosEmpenhoPorFonte(usuario)
 
     return render_template('resultado.html', dados=dados, fontes=fontes, empenhos=empenhos)    
 
