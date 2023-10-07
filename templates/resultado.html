@@ -2,7 +2,7 @@
 <html>
 
 <head>
-    <title>Consulta SQL</title>
+    <title>Resultados da Conferência</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -29,10 +29,15 @@
         th {
             background-color: #f0f0f0;
             font-weight: bold;
+            text-align: center;
         }
 
         tr:nth-child(even) {
             background-color: #f9f9f9;
+        }
+
+        .left-align {
+            text-align: left;
         }
     </style>
 </head>
@@ -182,6 +187,35 @@
                     <td>{{ "{:,.2f}".format(fonte[20]).replace(',', '|').replace('.', ',').replace('|', '.') }}</td>
                     <td>{{ "{:,.2f}".format(fonte[21]).replace(',', '|').replace('.', ',').replace('|', '.') }}</td>
                     <td>{{ "{:,.2f}".format(fonte[22]).replace(',', '|').replace('.', ',').replace('|', '.') }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h1>Movimento Diário de Despesa</h1>
+
+    <table>
+        <thead>
+            <tr>
+                <th>DATAMOVIMENTO</th>
+                <th>DOCUMENTO</th>
+                <th>DETALHE</th>
+                <th>TIPOMOVIMENTO</th>
+                <th>HISTORICO</th>
+                <th>FONTERECURSO</th>
+                <th>VALORMOVIMENTO</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for diario in diarios %}
+                <tr>
+                    <td>{{ diario[0].strftime('%d-%m-%Y') }}</td>
+                    <td>{{ diario[1] }}</td>
+                    <td>{{ diario[2] }}</td>
+                    <td class="left-align">{{ diario[3] }}</td>
+                    <td class="left-align">{{ diario[4] }}</td>
+                    <td>{{ diario[5] }}</td>
+                    <td>{{ "{:,.2f}".format(diario[6]).replace(',', '|').replace('.', ',').replace('|', '.') }}</td>
                 </tr>
             {% endfor %}
         </tbody>
