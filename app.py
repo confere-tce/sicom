@@ -1,11 +1,11 @@
-import os
-import connection
-import pandas as pd
+import os 
+import connection 
+import pandas as pd 
 from funcoes import criar_pasta_usuario, deletando_pasta
 from flask import Flask, render_template, request, url_for, redirect
 from zipfile import ZipFile
-from sqlalchemy import create_engine
-from relatorios import RelatorioAnaliticoEmpenho
+from sqlalchemy import create_engine 
+from relatorios import relatorioAnaliticoEmpenho, totalizaMovimentosPorFonte, movimentosEmpenhoPorFonte
 
 
 app = Flask(__name__)
@@ -122,9 +122,11 @@ def upload_file():
 @app.route('/resultado')
 def resultado():
     # Obtém os dados da função de consulta
-    dados = RelatorioAnaliticoEmpenho()
+    dados = relatorioAnaliticoEmpenho()
+    fontes = totalizaMovimentosPorFonte()
+    empenhos = movimentosEmpenhoPorFonte()
 
-    return render_template('resultado.html', dados=dados)    
+    return render_template('resultado.html', dados=dados, fontes=fontes, empenhos=empenhos)    
 
 if __name__ == '__main__':
     app.run(debug=True)
