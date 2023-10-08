@@ -5,7 +5,7 @@ from funcoes import criar_pasta_usuario, deletando_pasta
 from flask import Flask, render_template, request, url_for, redirect
 from zipfile import ZipFile
 from sqlalchemy import create_engine 
-from relatorios import relatorioAnaliticoEmpenho, totalizaMovimentosPorFonte, movimentosEmpenhoPorFonte, diarioDespesa
+# from relatorios import relatorioAnaliticoEmpenho, totalizaMovimentosPorFonte, movimentosEmpenhoPorFonte, diarioDespesa
 
 
 app = Flask(__name__)
@@ -46,6 +46,7 @@ def upload_file():
     if file:
 
         usuario = 'USUARIO'
+        ano = arquivo[4]
 
         # deletando informaçoes da tabela
         connection.delete(usuario)
@@ -108,8 +109,9 @@ def upload_file():
                     # Substituir NaN por None
                     df = df.where(pd.notna(df), None)
 
+                    df.insert(0, 'ano', ano)
                     df.insert(0, 'arquivo', nome_arquivo) 
-                    df.insert(0, 'modulo', 'AM')  
+                    df.insert(0, 'modulo', arquivo[0])  
                     df.insert(0, 'usuario', usuario)  
 
                     df.to_sql('tce_sicom', engine, if_exists='append', index=False)
@@ -118,17 +120,18 @@ def upload_file():
         # Deletando a pasta depois do processamento
         deletando_pasta(pasta_usuario)
 
-        return redirect(url_for("resultado", usuario=usuario))
+        return redirect(url_for("resultado", usuario=usuario, ano=ano))
     
-@app.route('//resultado/<usuario>')
-def resultado(usuario):
-    # Obtém os dados da função de consulta
-    dados = relatorioAnaliticoEmpenho(usuario)
-    fontes = totalizaMovimentosPorFonte(usuario)
-    empenhos = movimentosEmpenhoPorFonte(usuario)
-    diarios = diarioDespesa(usuario)
+@app.route('//resultado/<usuario>/<ano>')
+def resultado(usuario,ano):
+    # # Obtém os dados da função de consulta
+    # dados = relatorioAnaliticoEmpenho(usuario, ano)
+    # fontes = totalizaMovimentosPorFonte(usuario, ano)
+    # empenhos = movimentosEmpenhoPorFonte(usuario, ano)
+    # diarios = diarioDespesa(usuario, ano)
 
-    return render_template('resultado.html', dados=dados, fontes=fontes, empenhos=empenhos, diarios = diarios)    
+    # return render_template('resultado.html', dados=dados, fontes=fontes, empenhos=empenhos, diarios = diarios)  
+    return render_template('resultado.html')   
 
 if __name__ == '__main__':
     app.run(debug=True)

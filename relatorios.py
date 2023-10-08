@@ -1,6 +1,6 @@
 import connection
 
-def relatorioAnaliticoEmpenho(usuario):
+def relatorioAnaliticoEmpenho(usuario, ano):
 
     cursor = connection.conn.cursor()
 
@@ -73,14 +73,14 @@ def relatorioAnaliticoEmpenho(usuario):
         ORDER BY CAST(X.EMPENHO AS INT), X.FONTERECURSO, X.CO
     """
 
-    cursor.execute(consulta, (usuario,))
+    cursor.execute(consulta, (usuario,ano,))
     dados = cursor.fetchall()
 
     cursor.close()
 
     return dados
 
-def totalizaMovimentosPorFonte(usuario):
+def totalizaMovimentosPorFonte(usuario,ano):
 
     cursor = connection.conn.cursor()
 
@@ -295,14 +295,14 @@ def totalizaMovimentosPorFonte(usuario):
         ORDER BY CAST(SEQ3 AS INT)
     """
 
-    cursor.execute(consulta, (usuario,))
+    cursor.execute(consulta, (usuario,ano,))
     dados = cursor.fetchall()
 
     cursor.close()
 
     return dados
 
-def movimentosEmpenhoPorFonte(usuario):
+def movimentosEmpenhoPorFonte(usuario,ano):
 
     cursor = connection.conn.cursor()
 
@@ -372,7 +372,7 @@ def movimentosEmpenhoPorFonte(usuario):
         ORDER BY X.SEQ4, X.SEQ5
     """
 
-    cursor.execute(consulta, (usuario,))
+    cursor.execute(consulta, (usuario,ano,))
     dados = cursor.fetchall()
 
     cursor.close()
@@ -380,7 +380,7 @@ def movimentosEmpenhoPorFonte(usuario):
     return dados
 
 
-def diarioDespesa(usuario):
+def diarioDespesa(usuario,ano):
 
     cursor = connection.conn.cursor()
 
@@ -626,7 +626,7 @@ def diarioDespesa(usuario):
         ORDER BY X.DATAMOVIMENTO, X.TIPOMOVIMENTO
     """
 
-    cursor.execute(consulta, (usuario,))
+    cursor.execute(consulta, (usuario,ano,))
     dados = cursor.fetchall()
 
     cursor.close()
