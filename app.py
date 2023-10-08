@@ -5,7 +5,7 @@ from funcoes import criar_pasta_usuario, deletando_pasta
 from flask import Flask, render_template, request, url_for, redirect
 from zipfile import ZipFile
 from sqlalchemy import create_engine 
-# from relatorios import relatorioAnaliticoEmpenho, totalizaMovimentosPorFonte, movimentosEmpenhoPorFonte, diarioDespesa
+from relatorios import relatorioAnaliticoEmpenho, totalizaMovimentosPorFonte, movimentosEmpenhoPorFonte, diarioDespesa
 
 
 app = Flask(__name__)
@@ -124,14 +124,13 @@ def upload_file():
     
 @app.route('//resultado/<usuario>/<ano>')
 def resultado(usuario,ano):
-    # # Obtém os dados da função de consulta
-    # dados = relatorioAnaliticoEmpenho(usuario, ano)
-    # fontes = totalizaMovimentosPorFonte(usuario, ano)
-    # empenhos = movimentosEmpenhoPorFonte(usuario, ano)
-    # diarios = diarioDespesa(usuario, ano)
+    # Obtém os dados da função de consulta
+    dados = relatorioAnaliticoEmpenho(usuario, ano)
+    fontes = totalizaMovimentosPorFonte(usuario, ano)
+    empenhos = movimentosEmpenhoPorFonte(usuario, ano)
+    diarios = diarioDespesa(usuario, ano)
 
-    # return render_template('resultado.html', dados=dados, fontes=fontes, empenhos=empenhos, diarios = diarios)  
-    return render_template('resultado.html')   
+    return render_template('resultado.html', dados=dados, fontes=fontes, empenhos=empenhos, diarios = diarios)    
 
 if __name__ == '__main__':
     app.run(debug=True)
