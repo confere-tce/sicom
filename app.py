@@ -46,7 +46,7 @@ def upload_file():
     if file:
 
         usuario = 'USUARIO'
-        ano = arquivo[4]
+        ano = arquivo[4][0:4]
 
         # deletando informaçoes da tabela
         connection.delete(usuario)

@@ -20,7 +20,8 @@
             margin-bottom: 20px;
         }
 
-        th, td {
+        th,
+        td {
             border: 1px solid #ddd;
             padding: 5px;
             text-align: right;
@@ -68,32 +69,34 @@
             {% set total_pago = 0 %}
             {% set total_anulpago = 0 %}
             {% for dado in dados %}
-                <tr>
-                    <td>{{ dado[0] }}</td>
-                    <td>{{ dado[1] }}</td>
-                    <td>{{ dado[2] }}</td>
-                    <td>{{ "{:,.2f}".format(dado[3]).replace(',', '|').replace('.', ',').replace('|', '.') }}</td>
-                    <td>{{ "{:,.2f}".format(dado[4]).replace(',', '|').replace('.', ',').replace('|', '.') }}</td>
-                    <td>{{ "{:,.2f}".format(dado[5]).replace(',', '|').replace('.', ',').replace('|', '.') }}</td>
-                    <td>{{ "{:,.2f}".format(dado[6]).replace(',', '|').replace('.', ',').replace('|', '.') }}</td>
-                    <td>{{ "{:,.2f}".format(dado[7]).replace(',', '|').replace('.', ',').replace('|', '.') }}</td>
-                    <td>{{ "{:,.2f}".format(dado[8]).replace(',', '|').replace('.', ',').replace('|', '.') }}</td>
-                </tr>
-                {% set total_empenhado = total_empenhado + dado[3] %}
-                {% set total_anulempenhado = total_anulempenhado + dado[4] %}
-                {% set total_liquidado = total_liquidado + dado[5] %}
-                {% set total_anuliquidado = total_anuliquidado + dado[6] %}
-                {% set total_pago = total_pago + dado[7] %}
-                {% set total_anulpago = total_anulpago + dado[8] %}
+            <tr>
+                <td>{{ dado[0] }}</td>
+                <td>{{ dado[1] }}</td>
+                <td>{{ dado[2] }}</td>
+                <td>{{ "{:,.2f}".format(dado[3]).replace(',', '|').replace('.', ',').replace('|', '.') }}</td>
+                <td>{{ "{:,.2f}".format(dado[4]).replace(',', '|').replace('.', ',').replace('|', '.') }}</td>
+                <td>{{ "{:,.2f}".format(dado[5]).replace(',', '|').replace('.', ',').replace('|', '.') }}</td>
+                <td>{{ "{:,.2f}".format(dado[6]).replace(',', '|').replace('.', ',').replace('|', '.') }}</td>
+                <td>{{ "{:,.2f}".format(dado[7]).replace(',', '|').replace('.', ',').replace('|', '.') }}</td>
+                <td>{{ "{:,.2f}".format(dado[8]).replace(',', '|').replace('.', ',').replace('|', '.') }}</td>
+            </tr>
+            {% set total_empenhado = total_empenhado + dado[3] %}
+            {% set total_anulempenhado = total_anulempenhado + dado[4] %}
+            {% set total_liquidado = total_liquidado + dado[5] %}
+            {% set total_anuliquidado = total_anuliquidado + dado[6] %}
+            {% set total_pago = total_pago + dado[7] %}
+            {% set total_anulpago = total_anulpago + dado[8] %}
             {% endfor %}
         </tbody>
         <tfoot>
             <tr>
                 <td colspan="3">Total</td>
                 <td>{{ "{:,.2f}".format(total_empenhado).replace(',', '|').replace('.', ',').replace('|', '.') }}</td>
-                <td>{{ "{:,.2f}".format(total_anulempenhado).replace(',', '|').replace('.', ',').replace('|', '.') }}</td>
+                <td>{{ "{:,.2f}".format(total_anulempenhado).replace(',', '|').replace('.', ',').replace('|', '.') }}
+                </td>
                 <td>{{ "{:,.2f}".format(total_liquidado).replace(',', '|').replace('.', ',').replace('|', '.') }}</td>
-                <td>{{ "{:,.2f}".format(total_anuliquidado).replace(',', '|').replace('.', ',').replace('|', '.') }}</td>
+                <td>{{ "{:,.2f}".format(total_anuliquidado).replace(',', '|').replace('.', ',').replace('|', '.') }}
+                </td>
                 <td>{{ "{:,.2f}".format(total_pago).replace(',', '|').replace('.', ',').replace('|', '.') }}</td>
                 <td>{{ "{:,.2f}".format(total_anulpago).replace(',', '|').replace('.', ',').replace('|', '.') }}</td>
             </tr>
@@ -117,19 +120,19 @@
         </thead>
         <tbody>
             {% for empenho in empenhos %}
-                <tr>
-                    <td>{{ empenho[0] }}</td>
-                    <td>{{ empenho[1] }}</td>
-                    <td>{{ "{:,.2f}".format(empenho[2]).replace(',', '|').replace('.', ',').replace('|', '.') }}</td>
-                    <td>{{ "{:,.2f}".format(empenho[3]).replace(',', '|').replace('.', ',').replace('|', '.') }}</td>
-                    <td>{{ "{:,.2f}".format(empenho[4]).replace(',', '|').replace('.', ',').replace('|', '.') }}</td>
-                    <td>{{ "{:,.2f}".format(empenho[5]).replace(',', '|').replace('.', ',').replace('|', '.') }}</td>
-                    <td>{{ "{:,.2f}".format(empenho[6]).replace(',', '|').replace('.', ',').replace('|', '.') }}</td>
-                    <td>{{ "{:,.2f}".format(empenho[7]).replace(',', '|').replace('.', ',').replace('|', '.') }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+            <tr>
+                <td>{{ empenho[0] }}</td>
+                <td>{{ empenho[1] }}</td>
+                <td>{{ "{:,.2f}".format(empenho[2]).replace(',', '|').replace('.', ',').replace('|', '.') }}</td>
+                <td>{{ "{:,.2f}".format(empenho[3]).replace(',', '|').replace('.', ',').replace('|', '.') }}</td>
+                <td>{{ "{:,.2f}".format(empenho[4]).replace(',', '|').replace('.', ',').replace('|', '.') }}</td>
+                <td>{{ "{:,.2f}".format(empenho[5]).replace(',', '|').replace('.', ',').replace('|', '.') }}</td>
+                <td>{{ "{:,.2f}".format(empenho[6]).replace(',', '|').replace('.', ',').replace('|', '.') }}</td>
+                <td>{{ "{:,.2f}".format(empenho[7]).replace(',', '|').replace('.', ',').replace('|', '.') }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 
     <h1>Movimentos Totalizados por Fonte de Recurso</h1>
 
@@ -163,31 +166,31 @@
         </thead>
         <tbody>
             {% for fonte in fontes %}
-                <tr>
-                    <td>{{ fonte[0] }}</td>
-                    <td>{{ "{:,.2f}".format(fonte[1]).replace(',', '|').replace('.', ',').replace('|', '.') }}</td>
-                    <td>{{ "{:,.2f}".format(fonte[2]).replace(',', '|').replace('.', ',').replace('|', '.') }}</td>
-                    <td>{{ "{:,.2f}".format(fonte[3]).replace(',', '|').replace('.', ',').replace('|', '.') }}</td>
-                    <td>{{ "{:,.2f}".format(fonte[4]).replace(',', '|').replace('.', ',').replace('|', '.') }}</td>
-                    <td>{{ "{:,.2f}".format(fonte[5]).replace(',', '|').replace('.', ',').replace('|', '.') }}</td>
-                    <td>{{ "{:,.2f}".format(fonte[6]).replace(',', '|').replace('.', ',').replace('|', '.') }}</td>
-                    <td>{{ "{:,.2f}".format(fonte[7]).replace(',', '|').replace('.', ',').replace('|', '.') }}</td>
-                    <td>{{ "{:,.2f}".format(fonte[8]).replace(',', '|').replace('.', ',').replace('|', '.') }}</td>
-                    <td>{{ "{:,.2f}".format(fonte[9]).replace(',', '|').replace('.', ',').replace('|', '.') }}</td>
-                    <td>{{ "{:,.2f}".format(fonte[10]).replace(',', '|').replace('.', ',').replace('|', '.') }}</td>
-                    <td>{{ "{:,.2f}".format(fonte[11]).replace(',', '|').replace('.', ',').replace('|', '.') }}</td>
-                    <td>{{ "{:,.2f}".format(fonte[12]).replace(',', '|').replace('.', ',').replace('|', '.') }}</td>
-                    <td>{{ "{:,.2f}".format(fonte[13]).replace(',', '|').replace('.', ',').replace('|', '.') }}</td>
-                    <td>{{ "{:,.2f}".format(fonte[14]).replace(',', '|').replace('.', ',').replace('|', '.') }}</td>
-                    <td>{{ "{:,.2f}".format(fonte[15]).replace(',', '|').replace('.', ',').replace('|', '.') }}</td>
-                    <td>{{ "{:,.2f}".format(fonte[16]).replace(',', '|').replace('.', ',').replace('|', '.') }}</td>
-                    <td>{{ "{:,.2f}".format(fonte[17]).replace(',', '|').replace('.', ',').replace('|', '.') }}</td>
-                    <td>{{ "{:,.2f}".format(fonte[18]).replace(',', '|').replace('.', ',').replace('|', '.') }}</td>
-                    <td>{{ "{:,.2f}".format(fonte[19]).replace(',', '|').replace('.', ',').replace('|', '.') }}</td>
-                    <td>{{ "{:,.2f}".format(fonte[20]).replace(',', '|').replace('.', ',').replace('|', '.') }}</td>
-                    <td>{{ "{:,.2f}".format(fonte[21]).replace(',', '|').replace('.', ',').replace('|', '.') }}</td>
-                    <td>{{ "{:,.2f}".format(fonte[22]).replace(',', '|').replace('.', ',').replace('|', '.') }}</td>
-                </tr>
+            <tr>
+                <td>{{ fonte[0] }}</td>
+                <td>{{ "{:,.2f}".format(fonte[1]).replace(',', '|').replace('.', ',').replace('|', '.') }}</td>
+                <td>{{ "{:,.2f}".format(fonte[2]).replace(',', '|').replace('.', ',').replace('|', '.') }}</td>
+                <td>{{ "{:,.2f}".format(fonte[3]).replace(',', '|').replace('.', ',').replace('|', '.') }}</td>
+                <td>{{ "{:,.2f}".format(fonte[4]).replace(',', '|').replace('.', ',').replace('|', '.') }}</td>
+                <td>{{ "{:,.2f}".format(fonte[5]).replace(',', '|').replace('.', ',').replace('|', '.') }}</td>
+                <td>{{ "{:,.2f}".format(fonte[6]).replace(',', '|').replace('.', ',').replace('|', '.') }}</td>
+                <td>{{ "{:,.2f}".format(fonte[7]).replace(',', '|').replace('.', ',').replace('|', '.') }}</td>
+                <td>{{ "{:,.2f}".format(fonte[8]).replace(',', '|').replace('.', ',').replace('|', '.') }}</td>
+                <td>{{ "{:,.2f}".format(fonte[9]).replace(',', '|').replace('.', ',').replace('|', '.') }}</td>
+                <td>{{ "{:,.2f}".format(fonte[10]).replace(',', '|').replace('.', ',').replace('|', '.') }}</td>
+                <td>{{ "{:,.2f}".format(fonte[11]).replace(',', '|').replace('.', ',').replace('|', '.') }}</td>
+                <td>{{ "{:,.2f}".format(fonte[12]).replace(',', '|').replace('.', ',').replace('|', '.') }}</td>
+                <td>{{ "{:,.2f}".format(fonte[13]).replace(',', '|').replace('.', ',').replace('|', '.') }}</td>
+                <td>{{ "{:,.2f}".format(fonte[14]).replace(',', '|').replace('.', ',').replace('|', '.') }}</td>
+                <td>{{ "{:,.2f}".format(fonte[15]).replace(',', '|').replace('.', ',').replace('|', '.') }}</td>
+                <td>{{ "{:,.2f}".format(fonte[16]).replace(',', '|').replace('.', ',').replace('|', '.') }}</td>
+                <td>{{ "{:,.2f}".format(fonte[17]).replace(',', '|').replace('.', ',').replace('|', '.') }}</td>
+                <td>{{ "{:,.2f}".format(fonte[18]).replace(',', '|').replace('.', ',').replace('|', '.') }}</td>
+                <td>{{ "{:,.2f}".format(fonte[19]).replace(',', '|').replace('.', ',').replace('|', '.') }}</td>
+                <td>{{ "{:,.2f}".format(fonte[20]).replace(',', '|').replace('.', ',').replace('|', '.') }}</td>
+                <td>{{ "{:,.2f}".format(fonte[21]).replace(',', '|').replace('.', ',').replace('|', '.') }}</td>
+                <td>{{ "{:,.2f}".format(fonte[22]).replace(',', '|').replace('.', ',').replace('|', '.') }}</td>
+            </tr>
             {% endfor %}
         </tbody>
     </table>
@@ -208,15 +211,15 @@
         </thead>
         <tbody>
             {% for diario in diarios %}
-                <tr>
-                    <td>{{ diario[0].strftime('%d-%m-%Y') }}</td>
-                    <td>{{ diario[1] }}</td>
-                    <td>{{ diario[2] }}</td>
-                    <td class="left-align">{{ diario[3] }}</td>
-                    <td class="left-align">{{ diario[4] }}</td>
-                    <td>{{ diario[5] }}</td>
-                    <td>{{ "{:,.2f}".format(diario[6]).replace(',', '|').replace('.', ',').replace('|', '.') }}</td>
-                </tr>
+            <tr>
+                <td>{{ diario[0].strftime('%d-%m-%Y') }}</td>
+                <td>{{ diario[1] }}</td>
+                <td>{{ diario[2] }}</td>
+                <td class="left-align">{{ diario[3] }}</td>
+                <td class="left-align">{{ diario[4] }}</td>
+                <td>{{ diario[5] }}</td>
+                <td>{{ "{:,.2f}".format(diario[6]).replace(',', '|').replace('.', ',').replace('|', '.') }}</td>
+            </tr>
             {% endfor %}
         </tbody>
     </table>
