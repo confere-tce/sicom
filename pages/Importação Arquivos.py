@@ -268,4 +268,6 @@ if tudoOK:
         my_bar_AM.empty()
         my_bar_BAL.empty()
 
-        st.session_state.current_page = "Relatórios.py"
+        st.subheader("Resultados", divider='rainbow')
+
+
