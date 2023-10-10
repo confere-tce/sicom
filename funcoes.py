@@ -3,20 +3,24 @@ import os
 import string
 import shutil
 
-def criar_pasta_usuario():
+def criar_pasta_temporaria():
 
     comprimento = 15
-    nome_nova_pasta = ''.join(random.choice(string.ascii_letters + string.digits) for _ in range(comprimento))
+    pasta_temporaria = ''.join(random.choice(string.ascii_letters + string.digits) for _ in range(comprimento))
     # nome_nova_pasta = '12345678910'
     # nome_nova_pasta = '69162913620'
-    caminho_nova_pasta = os.path.join('uploads', nome_nova_pasta)
 
-    # Deletando a pasta antes de criar novamente
-    deletando_pasta(caminho_nova_pasta)
+    pasta_temporaria = os.path.join('uploads', pasta_temporaria)
+    os.mkdir(pasta_temporaria)
 
-    os.mkdir(caminho_nova_pasta)
+    return pasta_temporaria
 
-    return caminho_nova_pasta
+def criar_pasta_tipo_arquivo(pasta_temp, tipo_arquivo):
+
+    pasta_temporaria = os.path.join(pasta_temp, tipo_arquivo)
+    os.mkdir(pasta_temporaria)
+
+    return pasta_temporaria
 
 def deletando_pasta(pasta):
     try:
