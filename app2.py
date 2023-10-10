@@ -1,21 +1,28 @@
 import streamlit as st
-import connection 
+import connection
 import os
-import pandas as pd 
+import pandas as pd
 from funcoes import *
-from sqlalchemy import create_engine 
+from sqlalchemy import create_engine
 from zipfile import ZipFile
 
 
 def main():
 
+    st.set_page_config(
+        layout="wide",
+        initial_sidebar_state="expanded"
+    )
+
     # engine = create_engine('postgresql://jsmcfbqq:dzYLD0UV56ksursrQrP4fHMi_f1X116e@silly.db.elephantsql.com/jsmcfbqq') -> Elephant
-    engine = create_engine('postgresql://uberabpm:SICSADM@34.86.191.201/uberabpm')
+    engine = create_engine(
+        'postgresql://uberabpm:SICSADM@34.86.191.201/uberabpm')
 
     if not os.path.exists('uploads'):
         os.makedirs('uploads')
 
-    escolha = st.sidebar.selectbox("Menu", ["Home", "Importar Arquivo", "Relatórios"])
+    escolha = st.sidebar.selectbox(
+        "Menu", ["Home", "Importar Arquivo", "Relatórios"])
 
     css = '''
         <style>
@@ -38,85 +45,91 @@ def main():
         cod_orgao_AM = cod_orgao_BAL = None
         mes_AM = mes_BAL = None
 
-        arquivo_AM = st.file_uploader("Arquivos AM", 
-                                    type=["zip"], 
-                                    accept_multiple_files=False)
-                                    
-        if arquivo_AM is not None:
-            arquivo = arquivo_AM.name.split('_')
+        col1, col2 = st.columns(2)
+        with col1:
+            arquivo_AM = st.file_uploader("Arquivos AM",
+                                          type=["zip"],
+                                          accept_multiple_files=False)
 
-            if arquivo[0] != 'AM':
-                st.error('Arquivo não é AM (Acompanhamento Mensal)', icon="🚨")
-                tudoOK= False
+            if arquivo_AM is not None:
+                arquivo = arquivo_AM.name.split('_')
 
+                if arquivo[0] != 'AM':
+                    st.error('Arquivo não é AM (Acompanhamento Mensal)', icon="🚨")
+                    tudoOK = False
 
-            #pega o cod Municipio do AM
-            cod_municipio_AM = arquivo[1]
+                # pega o cod Municipio do AM
+                cod_municipio_AM = arquivo[1]
 
-            #pega o orgao do AM
-            cod_orgao_AM = arquivo[2]
+                # pega o orgao do AM
+                cod_orgao_AM = arquivo[2]
 
-            #pega o Mes do AM
-            mes_AM = arquivo[3]            
+                # pega o Mes do AM
+                mes_AM = arquivo[3]
 
-            #pegar no ano no arquivo AM
-            ano_arquivo_AM = int(arquivo[4][0:4])
-        else:
-            tudoOK = False
+                # pegar no ano no arquivo AM
+                ano_arquivo_AM = int(arquivo[4][0:4])
+            else:
+                tudoOK = False
+            
+        with col2:
+            arquivo_BAL = st.file_uploader("Arquivos Balancete",
+                                        type=["zip"],
+                                        accept_multiple_files=False)
 
-        arquivo_BAL = st.file_uploader("Arquivos Balancete", 
-                                    type=["zip"], 
-                                    accept_multiple_files=False)
+            if arquivo_BAL is not None:
+                arquivo = arquivo_BAL.name.split('_')
 
-        if arquivo_BAL is not None:
-            arquivo = arquivo_BAL.name.split('_')
+                if arquivo[0] != 'BALANCETE':
+                    st.error('Arquivo não é Balancete', icon="🚨")
+                    tudoOK = False
 
-            if arquivo[0] != 'BALANCETE':
-                st.error('Arquivo não é Balancete', icon="🚨")
-                tudoOK= False
+                # pega o Cod Municipio do Balancete
+                cod_municipio_BAL = arquivo[1]
 
-            #pega o Cod Municipio do Balancete
-            cod_municipio_BAL = arquivo[1]
+                # pega o orgao do BAL
+                cod_orgao_BAL = arquivo[2]
 
-            #pega o orgao do BAL
-            cod_orgao_BAL = arquivo[2]
+                # pega o Mes do BAL
+                mes_BAL = arquivo[3]
 
-            #pega o Mes do BAL
-            mes_BAL = arquivo[3]
-
-            #pegar no ano no arquivo Balancete
-            ano_arquivo_Bal = int(arquivo[4][0:4])
-        else:
-            tudoOK = False
+                # pegar no ano no arquivo Balancete
+                ano_arquivo_Bal = int(arquivo[4][0:4])
+            else:
+                tudoOK = False
 
         # validações entre os dois arquivos
         if ano_arquivo_AM is not None and ano_arquivo_Bal is not None and ano_arquivo_AM != ano_arquivo_Bal:
-            st.error(f"O Ano do arquivo AM ({ano_arquivo_AM}) está diferente do Ano do arquivo Balancete ({ano_arquivo_Bal}) ", icon="🚨")
-            tudoOK= False
+            st.error(
+                f"O Ano do arquivo AM ({ano_arquivo_AM}) está diferente do Ano do arquivo Balancete ({ano_arquivo_Bal}) ", icon="🚨")
+            tudoOK = False
 
         if cod_municipio_AM is not None and cod_municipio_BAL is not None and cod_municipio_AM != cod_municipio_BAL:
-            st.error(f"O Código do Municipio do arquivo AM ({cod_municipio_AM}) está diferente do Código do Municipio do arquivo Balancete ({cod_municipio_BAL}) ", icon="🚨")
-            tudoOK= False
+            st.error(
+                f"O Código do Municipio do arquivo AM ({cod_municipio_AM}) está diferente do Código do Municipio do arquivo Balancete ({cod_municipio_BAL}) ", icon="🚨")
+            tudoOK = False
 
         if cod_orgao_AM is not None and cod_orgao_BAL is not None and cod_orgao_AM != cod_orgao_BAL:
-            st.error(f"O Código do Orgão do arquivo AM ({cod_orgao_AM}) está diferente do Código do Orgão do arquivo Balancete ({cod_orgao_BAL}) ", icon="🚨")
-            tudoOK= False
+            st.error(
+                f"O Código do Orgão do arquivo AM ({cod_orgao_AM}) está diferente do Código do Orgão do arquivo Balancete ({cod_orgao_BAL}) ", icon="🚨")
+            tudoOK = False
 
         if mes_AM is not None and mes_BAL is not None and mes_AM != mes_BAL:
-            st.error(f"O Mês de geração do arquivo AM ({mes_AM}) está diferente do Mês de geração do arquivo Balancete ({mes_BAL}) ", icon="🚨")
-            tudoOK= False            
+            st.error(
+                f"O Mês de geração do arquivo AM ({mes_AM}) está diferente do Mês de geração do arquivo Balancete ({mes_BAL}) ", icon="🚨")
+            tudoOK = False
 
         st.divider()
 
         if tudoOK:
             if st.button("Processar o Arquivo", type="primary"):
 
-                usuario = 'USUARIO' #teste, depois pegar o usuario logado
+                usuario = 'USUARIO'  # teste, depois pegar o usuario logado
 
                 # deletando informaçoes da tabela
                 connection.delete(usuario)
 
-                #criando pasta temporaria e mandando o arquivo zip pra pasta
+                # criando pasta temporaria e mandando o arquivo zip pra pasta
                 pasta_temp = criar_pasta_temporaria()
 
                 pasta_AM = criar_pasta_tipo_arquivo(pasta_temp, "AM")
@@ -135,14 +148,15 @@ def main():
 
                 # Descompactando o arquivo AM
                 with ZipFile(arquivo_zip_AM, 'r') as zip:
-                    zip.extractall(pasta_AM) 
+                    zip.extractall(pasta_AM)
 
                 # Descompactando o arquivo Balancete
                 with ZipFile(arquivo_zip_BAL, 'r') as zip:
-                    zip.extractall(pasta_BAL) 
+                    zip.extractall(pasta_BAL)
 
-                nomes_colunas = ['seq1', 'seq2', 'seq3', 'seq4', 'seq5', 'seq6', 'seq7', 'seq8', 'seq9', 'seq10', 'seq11', 'seq12', 'seq13', 'seq14', 'seq15', 'seq16', 'seq17', 'seq18', 'seq19', 'seq20', 'seq21', 'seq22', 'seq23', 'seq24', 'seq25', 'seq26', 'seq27', 'seq28', 'seq29', 'seq30', 'seq31', 'seq32', 'seq33', 'seq34', 'seq35', 'seq36', 'seq37', 'seq38', 'seq39', 'seq40']
-                dtypes = {coluna: str for coluna in range(30)}  
+                nomes_colunas = ['seq1', 'seq2', 'seq3', 'seq4', 'seq5', 'seq6', 'seq7', 'seq8', 'seq9', 'seq10', 'seq11', 'seq12', 'seq13', 'seq14', 'seq15', 'seq16', 'seq17', 'seq18', 'seq19', 'seq20',
+                                 'seq21', 'seq22', 'seq23', 'seq24', 'seq25', 'seq26', 'seq27', 'seq28', 'seq29', 'seq30', 'seq31', 'seq32', 'seq33', 'seq34', 'seq35', 'seq36', 'seq37', 'seq38', 'seq39', 'seq40']
+                dtypes = {coluna: str for coluna in range(30)}
 
                 # Carregando os arquivos AM
                 my_bar_AM = st.progress(0, text="")
@@ -153,8 +167,9 @@ def main():
                 for arquivo_csv in os.listdir(pasta_AM):
                     if arquivo_csv.endswith('.csv'):
 
-                        my_bar_AM.progress(int(indice / quantidade_arquivos * 100), text="Processando arquivo Acompanhamento Mensal (AM)... aguarde")
-                        indice +=1
+                        my_bar_AM.progress(int(indice / quantidade_arquivos * 100),
+                                           text="Processando arquivo Acompanhamento Mensal (AM)... aguarde")
+                        indice += 1
 
                         # Pegando o nome do arquivo
                         x = arquivo_csv.rfind(".")
@@ -162,25 +177,25 @@ def main():
 
                         processa = False
                         if nome_arquivo == 'AEX' or \
-                        nome_arquivo == 'ALQ' or \
-                        nome_arquivo == 'ANL' or \
-                        nome_arquivo == 'AOB' or \
-                        nome_arquivo == 'AOC' or \
-                        nome_arquivo == 'AOP' or \
-                        nome_arquivo == 'ARC' or \
-                        nome_arquivo == 'CAIXA' or \
-                        nome_arquivo == 'CTB' or \
-                        nome_arquivo == 'CUTE' or \
-                        nome_arquivo == 'EMP' or \
-                        nome_arquivo == 'EXT' or \
-                        nome_arquivo == 'IDE' or \
-                        nome_arquivo == 'IDERP' or \
-                        nome_arquivo == 'LQD' or \
-                        nome_arquivo == 'OBELAC' or \
-                        nome_arquivo == 'OPS' or \
-                        nome_arquivo == 'ORGAO' or \
-                        nome_arquivo == 'REC' or \
-                        nome_arquivo == 'RSP':
+                                nome_arquivo == 'ALQ' or \
+                                nome_arquivo == 'ANL' or \
+                                nome_arquivo == 'AOB' or \
+                                nome_arquivo == 'AOC' or \
+                                nome_arquivo == 'AOP' or \
+                                nome_arquivo == 'ARC' or \
+                                nome_arquivo == 'CAIXA' or \
+                                nome_arquivo == 'CTB' or \
+                                nome_arquivo == 'CUTE' or \
+                                nome_arquivo == 'EMP' or \
+                                nome_arquivo == 'EXT' or \
+                                nome_arquivo == 'IDE' or \
+                                nome_arquivo == 'IDERP' or \
+                                nome_arquivo == 'LQD' or \
+                                nome_arquivo == 'OBELAC' or \
+                                nome_arquivo == 'OPS' or \
+                                nome_arquivo == 'ORGAO' or \
+                                nome_arquivo == 'REC' or \
+                                nome_arquivo == 'RSP':
                             processa = True
 
                         if processa:
@@ -188,10 +203,12 @@ def main():
                             arq_completo = os.path.join(pasta_AM, arquivo_csv)
 
                             # Carregar o arquivo CSV em um DataFrame do Pandas
-                            df = pd.read_csv(arq_completo, delimiter=';', encoding='latin-1', header=None, names=nomes_colunas, dtype=dtypes)
+                            df = pd.read_csv(arq_completo, delimiter=';', encoding='latin-1',
+                                             header=None, names=nomes_colunas, dtype=dtypes)
 
                             # Preencher com None para completar até 30 colunas
-                            df = df.reindex(columns=[*df.columns, *range(30 - len(df.columns))])
+                            df = df.reindex(
+                                columns=[*df.columns, *range(30 - len(df.columns))])
 
                             # Manter apenas as 30 primeiras colunas
                             df = df.iloc[:, :30]
@@ -200,13 +217,15 @@ def main():
                             df = df.where(pd.notna(df), None)
 
                             df.insert(0, 'ano', ano_arquivo_AM)
-                            df.insert(0, 'arquivo', nome_arquivo) 
-                            df.insert(0, 'modulo', "AM")  
-                            df.insert(0, 'usuario', usuario)  
+                            df.insert(0, 'arquivo', nome_arquivo)
+                            df.insert(0, 'modulo', "AM")
+                            df.insert(0, 'usuario', usuario)
 
-                            df.to_sql('tce_sicom', engine, if_exists='append', index=False)
+                            df.to_sql('tce_sicom', engine,
+                                      if_exists='append', index=False)
 
-                st.success("Arquivo 'ACOMPANHAMENTO MENSAL (AM)' Importado com Sucesso", icon="✅")
+                st.success(
+                    "Arquivo 'ACOMPANHAMENTO MENSAL (AM)' Importado com Sucesso", icon="✅")
 
                 # Carregando os arquivos Balancete
                 my_bar_BAL = st.progress(0, text="")
@@ -217,8 +236,9 @@ def main():
                 for arquivo_csv in os.listdir(pasta_BAL):
                     if arquivo_csv.endswith('.csv'):
 
-                        my_bar_BAL.progress(int(indice / quantidade_arquivos * 100), text="Processando arquivo Balancete... aguarde")
-                        indice +=1
+                        my_bar_BAL.progress(int(
+                            indice / quantidade_arquivos * 100), text="Processando arquivo Balancete... aguarde")
+                        indice += 1
 
                         # Pegando o nome do arquivo
                         x = arquivo_csv.rfind(".")
@@ -233,10 +253,12 @@ def main():
                             arq_completo = os.path.join(pasta_BAL, arquivo_csv)
 
                             # Carregar o arquivo CSV em um DataFrame do Pandas
-                            df = pd.read_csv(arq_completo, delimiter=';', encoding='latin-1', header=None, names=nomes_colunas, dtype=dtypes)
+                            df = pd.read_csv(arq_completo, delimiter=';', encoding='latin-1',
+                                             header=None, names=nomes_colunas, dtype=dtypes)
 
                             # Preencher com None para completar até 30 colunas
-                            df = df.reindex(columns=[*df.columns, *range(30 - len(df.columns))])
+                            df = df.reindex(
+                                columns=[*df.columns, *range(30 - len(df.columns))])
 
                             # Manter apenas as 30 primeiras colunas
                             df = df.iloc[:, :30]
@@ -245,14 +267,15 @@ def main():
                             df = df.where(pd.notna(df), None)
 
                             df.insert(0, 'ano', ano_arquivo_Bal)
-                            df.insert(0, 'arquivo', nome_arquivo) 
-                            df.insert(0, 'modulo', "BAL")  
-                            df.insert(0, 'usuario', usuario)  
+                            df.insert(0, 'arquivo', nome_arquivo)
+                            df.insert(0, 'modulo', "BAL")
+                            df.insert(0, 'usuario', usuario)
 
-                            df.to_sql('tce_sicom', engine, if_exists='append', index=False)        
-                            
-                st.success("Arquivo 'BALANCETE' Importado com Sucesso", icon="✅")
-              
+                            df.to_sql('tce_sicom', engine,
+                                      if_exists='append', index=False)
+
+                st.success(
+                    "Arquivo 'BALANCETE' Importado com Sucesso", icon="✅")
 
                 # Deletando a pasta depois do processamento
                 deletando_pasta(pasta_temp)
@@ -264,22 +287,6 @@ def main():
 
     else:
         st.subheader("Relatórios", divider='rainbow')
-
-        col1, col2 = st.columns(2)
-
-        with col1:
-            st.header("Acompanhamento Mensal (AM)")
-            arquivo_AM = st.file_uploader("Arquivos AM", 
-                                    type=["zip"], 
-                                    accept_multiple_files=False, 
-                                    label_visibility="hidden")
-
-        with col2:
-            st.header("Balancete")
-            arquivo_BAL = st.file_uploader("Arquivos Balancete", 
-                                    type=["zip"], 
-                                    accept_multiple_files=False, 
-                                    label_visibility="hidden")
 
 
 if __name__ == '__main__':
