@@ -5,6 +5,8 @@ import pandas as pd
 from funcoes import *
 from sqlalchemy import create_engine
 from zipfile import ZipFile
+import VariaveisGlobais
+
 
 
 # engine = create_engine('postgresql://jsmcfbqq:dzYLD0UV56ksursrQrP4fHMi_f1X116e@silly.db.elephantsql.com/jsmcfbqq') -> Elephant
@@ -30,6 +32,7 @@ ano_arquivo_AM = ano_arquivo_Bal = None
 cod_municipio_AM = cod_municipio_BAL = None
 cod_orgao_AM = cod_orgao_BAL = None
 mes_AM = mes_BAL = None
+usuario = None
 
 col1, col2 = st.columns(2)
 with col1:
@@ -209,6 +212,9 @@ if tudoOK:
 
                     df.to_sql('tce_sicom', engine,
                               if_exists='append', index=False)
+                    
+                    VariaveisGlobais.definir_variaveis_globais(ano_arquivo_AM, usuario)
+                    
 
         st.success(
             "Arquivo 'ACOMPANHAMENTO MENSAL (AM)' Importado com Sucesso", icon="✅")
@@ -259,6 +265,7 @@ if tudoOK:
 
                     df.to_sql('tce_sicom', engine,
                               if_exists='append', index=False)
+                    
 
         st.success("Arquivo 'BALANCETE' Importado com Sucesso", icon="✅")
 
@@ -269,5 +276,7 @@ if tudoOK:
         my_bar_BAL.empty()
 
         st.subheader("Resultados", divider='rainbow')
+
+        st.markdown("[Clique aqui para acessar a página de Relatórios](/Relatórios)")
 
 
