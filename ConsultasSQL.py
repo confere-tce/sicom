@@ -636,3 +636,246 @@ def diarioDespesa(usuario,ano):
     cursor.close()
 
     return dados
+
+############################Conferencias
+
+def confereSaldoFinalBancos(usuario,ano):
+
+    cursor = connection.conn.cursor()
+
+    # Consulta SQL
+    consulta = """
+        SELECT SUM(X.SALDOFINALCTB) AS SALDOFINALCTB, SUM(X.SALDOFINALBAL) AS SALDOFINALBAL
+        FROM (
+        SELECT ANO, USUARIO, CAST(SEQ5 AS DECIMAL(20,0)) AS FICHA, SEQ6 AS FONTERECURSO, SUM(CAST(REPLACE(SEQ12, ',', '.') AS NUMERIC) * (CASE WHEN SEQ13 = 'C' THEN -1 ELSE 1 END)) AS SALDOFINALBAL, 0 AS SALDOFINALCTB
+        FROM TCE_SICOM 
+        WHERE ARQUIVO = 'BALANCETE'
+        AND SEQ1 = '17'
+        AND (SUBSTRING(SEQ2,1,7) NOT LIKE '1111101' OR SUBSTRING(SEQ2,1,7) NOT LIKE '1111102' OR SUBSTRING(SEQ2,1,6) NOT LIKE '111113' OR SUBSTRING(SEQ2,1,7) NOT LIKE '1112101')
+        GROUP BY ANO, USUARIO, CAST(SEQ5 AS DECIMAL(20,0)), SEQ6 
+
+
+        UNION ALL
+
+        SELECT ANO, USUARIO, CAST(SEQ3 AS DECIMAL(20,0)) AS FICHA, SEQ4 AS FONTERECURSO, 0, SUM(CAST(REPLACE(SEQ7, ',', '.') AS NUMERIC))
+        FROM TCE_SICOM 
+        WHERE MODULO = 'AM'
+        AND ARQUIVO = 'CTB'
+        AND SEQ1 = '20'
+        AND SEQ5 = '1'
+        GROUP BY  ANO, USUARIO, CAST(SEQ3 AS DECIMAL(20,0)), SEQ4) X
+        WHERE 1=1
+        AND X.USUARIO = %s
+        AND X.ANO = %s
+    """
+
+    cursor.execute(consulta, (usuario,ano,))
+    dados = cursor.fetchall()
+
+    cursor.close()
+
+    return dados
+
+def buscaDiferencaSaldoFinalBancos(usuario,ano):
+
+    cursor = connection.conn.cursor()
+
+    # Consulta SQL
+    consulta = """
+        SELECT X.FICHA, X.FONTERECURSO, SUM(X.SALDOFINALCTB) AS SALDOFINALCTB, SUM(X.SALDOFINALBAL) AS SALDOFINALBAL
+        FROM (
+        SELECT ANO, USUARIO, CAST(SEQ5 AS DECIMAL(20,0)) AS FICHA, SEQ6 AS FONTERECURSO, SUM(CAST(REPLACE(SEQ12, ',', '.') AS NUMERIC) * (CASE WHEN SEQ13 = 'C' THEN -1 ELSE 1 END)) AS SALDOFINALBAL, 0 AS SALDOFINALCTB
+        FROM TCE_SICOM 
+        WHERE ARQUIVO = 'BALANCETE'
+        AND SEQ1 = '17'
+        AND (SUBSTRING(SEQ2,1,7) NOT LIKE '1111101' OR SUBSTRING(SEQ2,1,7) NOT LIKE '1111102' OR SUBSTRING(SEQ2,1,6) NOT LIKE '111113' OR SUBSTRING(SEQ2,1,7) NOT LIKE '1112101')
+        GROUP BY ANO, USUARIO, CAST(SEQ5 AS DECIMAL(20,0)), SEQ6 
+
+
+        UNION ALL
+
+        SELECT ANO, USUARIO, CAST(SEQ3 AS DECIMAL(20,0)) AS FICHA, SEQ4 AS FONTERECURSO, 0, SUM(CAST(REPLACE(SEQ7, ',', '.') AS NUMERIC))
+        FROM TCE_SICOM 
+        WHERE MODULO = 'AM'
+        AND ARQUIVO = 'CTB'
+        AND SEQ1 = '20'
+        AND SEQ5 = '1'
+        GROUP BY  ANO, USUARIO, CAST(SEQ3 AS DECIMAL(20,0)), SEQ4) X
+        WHERE 1=1
+        AND X.USUARIO = %s
+        AND X.ANO = %s
+        GROUP BY X.FICHA, X.FONTERECURSO
+        HAVING SUM(X.SALDOFINALCTB) != SUM(X.SALDOFINALBAL)
+    """
+
+    cursor.execute(consulta, (usuario,ano,))
+    dados = cursor.fetchall()
+
+    cursor.close()
+
+    return dados
+
+def confereValoresEmpenhados(usuario,ano):
+
+    cursor = connection.conn.cursor()
+
+    # Consulta SQL
+    consulta = """
+        SELECT SUM(X.EMPENHOS) AS AM, SUM(X.EMPENHADO) AS BALANCETE
+        FROM (
+        SELECT ANO, USUARIO, SEQ4, SEQ5, SEQ6, SEQ7, SEQ8, SEQ9, SEQ10, SEQ11, SEQ13, SUM(CAST(REPLACE(SEQ18, ',', '.') AS NUMERIC)) AS EMPENHADO, 0 AS EMPENHOS
+        FROM TCE_SICOM 
+        WHERE ARQUIVO = 'BALANCETE'
+        AND SEQ1 = '30'
+        AND SUBSTRING(SEQ2,1,7) LIKE '6221301'
+        GROUP BY ANO, USUARIO, SEQ4, SEQ5, SEQ6, SEQ7, SEQ8, SEQ9, SEQ10, SEQ11, SEQ13
+
+        UNION ALL
+
+        SELECT A.ANO, A.USUARIO, A.SEQ2, A.SEQ3, A.SEQ4, A.SEQ5, A.SEQ6, A.SEQ7, A.SEQ8, A.SEQ9, B.SEQ4, 0 AS EMPENHADO, SUM(CAST(REPLACE(B.SEQ6, ',', '.') AS NUMERIC)) AS EMPENHOS
+        FROM TCE_SICOM A
+        JOIN TCE_SICOM B ON (A.USUARIO = B.USUARIO AND A.ANO  = B.ANO AND A.MODULO = B.MODULO AND A.ARQUIVO = B.ARQUIVO AND B.SEQ1 = '11' AND A.SEQ11 = B.SEQ3)
+        WHERE A.ARQUIVO = 'EMP' 
+        AND A.SEQ1 = '10'
+        GROUP BY A.ANO, A.USUARIO, A.SEQ2, A.SEQ3, A.SEQ4, A.SEQ5, A.SEQ6, A.SEQ7, A.SEQ8, A.SEQ9, B.SEQ4) X
+        WHERE 1=1
+        AND X.USUARIO = %s
+        AND X.ANO = %s
+    """
+
+    cursor.execute(consulta, (usuario,ano,))
+    dados = cursor.fetchall()
+
+    cursor.close()
+
+    return dados
+
+def buscaDiferencaValoresEmpenhados(usuario,ano):
+
+    cursor = connection.conn.cursor()
+
+    # Consulta SQL
+    consulta = """
+        SELECT X.SEQ4, X.SEQ5, X.SEQ6, X.SEQ7, X.SEQ8, X.SEQ9, X.SEQ10, X.SEQ11, X.SEQ13, SUM(X.EMPENHOS) AS AM, SUM(X.EMPENHADO) AS BALANCETE
+        FROM (
+        SELECT ANO, USUARIO, SEQ4, SEQ5, SEQ6, SEQ7, SEQ8, SEQ9, SEQ10, SEQ11, SEQ13, SUM(CAST(REPLACE(SEQ18, ',', '.') AS NUMERIC)) AS EMPENHADO, 0 AS EMPENHOS
+        FROM TCE_SICOM 
+        WHERE ARQUIVO = 'BALANCETE'
+        AND SEQ1 = '30'
+        AND SUBSTRING(SEQ2,1,7) LIKE '6221301'
+        GROUP BY ANO, USUARIO, SEQ4, SEQ5, SEQ6, SEQ7, SEQ8, SEQ9, SEQ10, SEQ11, SEQ13
+
+        UNION ALL
+
+        SELECT A.ANO, A.USUARIO, A.SEQ2, A.SEQ3, A.SEQ4, A.SEQ5, A.SEQ6, A.SEQ7, A.SEQ8, A.SEQ9, B.SEQ4, 0, SUM(CAST(REPLACE(B.SEQ6, ',', '.') AS NUMERIC)) AS EMPENHOS
+        FROM TCE_SICOM A
+        JOIN TCE_SICOM B ON (A.USUARIO = B.USUARIO AND A.ANO  = B.ANO AND A.MODULO = B.MODULO AND A.ARQUIVO = B.ARQUIVO AND B.SEQ1 = '11' AND A.SEQ11 = B.SEQ3)
+        WHERE A.ARQUIVO = 'EMP' 
+        AND A.SEQ1 = '10'
+        GROUP BY A.ANO, A.USUARIO, A.SEQ2, A.SEQ3, A.SEQ4, A.SEQ5, A.SEQ6, A.SEQ7, A.SEQ8, A.SEQ9, B.SEQ4) X
+        WHERE 1=1
+        AND X.USUARIO = %s
+        AND X.ANO = %s
+        GROUP BY X.SEQ4, X.SEQ5, X.SEQ6, X.SEQ7, X.SEQ8, X.SEQ9, X.SEQ10, X.SEQ11, X.SEQ13
+        HAVING SUM(X.EMPENHADO) != SUM(X.EMPENHOS)
+    """
+
+    cursor.execute(consulta, (usuario,ano,))
+    dados = cursor.fetchall()
+
+    cursor.close()
+
+    return dados
+
+def confereValoresReceitas(usuario,ano):
+
+    cursor = connection.conn.cursor()
+
+    # Consulta SQL
+    consulta = """
+        SELECT SUM(X.REALREC) AS REALREC, SUM(X.REALCTB) AS REALCTB, SUM( X.REALBALANCETE) AS REALBALANCETE
+        FROM (
+        SELECT USUARIO, ANO, SEQ4 as RECEITA , SEQ5 as FONTERECURSO,SUM(CAST(REPLACE(SEQ12, ',', '.') AS NUMERIC) - CAST(REPLACE(SEQ11, ',', '.') AS NUMERIC)) AS REALBALANCETE, 0 as REALREC, 0 as REALCTB
+        FROM TCE_SICOM 
+        WHERE ARQUIVO = 'BALANCETE'
+        AND SEQ1 = '31'
+        AND SUBSTRING(SEQ2,1,4) LIKE '6212'
+        GROUP BY USUARIO, ANO, SEQ4 , SEQ5
+
+        UNION ALL
+
+        SELECT A.USUARIO, A.ANO, A.SEQ6, B.SEQ3, 0, SUM(CAST(REPLACE(B.SEQ11, ',', '.') AS NUMERIC)) AS REALREC, 0
+        FROM TCE_SICOM A
+        JOIN TCE_SICOM B ON (A.usuario = B.usuario and A.ano = B.ano and A.MODULO = B.MODULO AND A.ARQUIVO = B.ARQUIVO AND A.SEQ2 = B.SEQ2 AND B.SEQ1 = '11')
+        WHERE A.ARQUIVO = 'REC'
+        AND A.SEQ1 = '10'
+        AND A.SEQ5 = ' '
+        GROUP BY A.USUARIO, A.ANO, A.SEQ6, B.SEQ3
+
+        UNION ALL
+
+        SELECT USUARIO, ANO, SEQ5, SEQ6, 0, 0, SUM(CAST(REPLACE(SEQ9, ',', '.') AS NUMERIC)) AS REALCTB
+        FROM TCE_SICOM
+        WHERE ARQUIVO = 'CTB'
+        AND SEQ1 = '22'
+        AND SEQ4 = ' '
+        GROUP BY USUARIO, ANO, SEQ5, SEQ6) X
+        WHERE 1=1
+        AND X.USUARIO = %s
+        AND X.ANO = %s
+    """
+
+    cursor.execute(consulta, (usuario,ano,))
+    dados = cursor.fetchall()
+
+    cursor.close()
+
+    return dados
+
+def buscaDiferencaValoresReceitas(usuario,ano):
+
+    cursor = connection.conn.cursor()
+
+    # Consulta SQL
+    consulta = """
+        SELECT X.RECEITA AS RECEITA, X.FONTERECURSO AS FONTERECURSO, SUM(X.REALREC) AS REALREC, SUM(X.REALCTB) AS REALCTB, SUM( X.REALBALANCETE) AS REALBALANCETE
+        FROM (
+        SELECT USUARIO, ANO, SEQ4 as RECEITA , SEQ5 as FONTERECURSO,SUM(CAST(REPLACE(SEQ12, ',', '.') AS NUMERIC) - CAST(REPLACE(SEQ11, ',', '.') AS NUMERIC)) AS REALBALANCETE, 0 as REALREC, 0 as REALCTB
+        FROM TCE_SICOM 
+        WHERE ARQUIVO = 'BALANCETE'
+        AND SEQ1 = '31'
+        AND SUBSTRING(SEQ2,1,4) LIKE '6212'
+        GROUP BY USUARIO, ANO, SEQ4 , SEQ5
+
+        UNION ALL
+
+        SELECT A.USUARIO, A.ANO, A.SEQ6, B.SEQ3, 0, SUM(CAST(REPLACE(B.SEQ11, ',', '.') AS NUMERIC)) AS REALREC, 0
+        FROM TCE_SICOM A
+        JOIN TCE_SICOM B ON (A.usuario = B.usuario and A.ano = B.ano and A.MODULO = B.MODULO AND A.ARQUIVO = B.ARQUIVO AND A.SEQ2 = B.SEQ2 AND B.SEQ1 = '11')
+        WHERE A.ARQUIVO = 'REC'
+        AND A.SEQ1 = '10'
+        AND A.SEQ5 = ' '
+        GROUP BY A.USUARIO, A.ANO, A.SEQ6, B.SEQ3
+
+        UNION ALL
+
+        SELECT USUARIO, ANO, SEQ5, SEQ6, 0, 0, SUM(CAST(REPLACE(SEQ9, ',', '.') AS NUMERIC)) AS REALCTB
+        FROM TCE_SICOM
+        WHERE ARQUIVO = 'CTB'
+        AND SEQ1 = '22'
+        AND SEQ4 = ' '
+        GROUP BY USUARIO, ANO, SEQ5, SEQ6) X
+        WHERE 1=1
+        AND X.USUARIO = %s
+        AND X.ANO = %s
+        GROUP BY X.RECEITA, X.FONTERECURSO
+        HAVING SUM( X.REALBALANCETE) != SUM(X.REALREC) or SUM( X.REALBALANCETE)!= SUM(X.REALCTB) or SUM(X.REALREC) != SUM(X.REALCTB)
+        ORDER BY X.RECEITA, X.FONTERECURSO
+    """
+
+    cursor.execute(consulta, (usuario,ano,))
+    dados = cursor.fetchall()
+
+    cursor.close()
+
+    return dados
