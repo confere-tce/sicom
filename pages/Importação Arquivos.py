@@ -2,7 +2,9 @@ import streamlit as st
 import connection
 import os
 import pandas as pd
+import locale
 from funcoes import *
+from ConsultasSQL import confereSaldoFinalBancos, buscaDiferencaSaldoFinalBancos, confereValoresEmpenhados, buscaDiferencaValoresEmpenhados, confereValoresReceitas, buscaDiferencaValoresReceitas
 from sqlalchemy import create_engine
 from zipfile import ZipFile
 import VariaveisGlobais
@@ -277,6 +279,73 @@ if tudoOK:
 
         st.subheader("Resultados", divider='rainbow')
 
-        st.markdown("[Clique aqui para acessar a página de Relatórios](/Relatórios)")
+        locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')
 
+        # Exibe os dados bancários
 
+        bancos = confereSaldoFinalBancos(usuario, ano_arquivo_AM)
+
+        st.markdown("**Contas Bancárias:**")
+        if bancos:
+            saldo_am_formatado = locale.currency(bancos[0][0], grouping=True, symbol=False)
+            saldo_bal_formatado = locale.currency(bancos[0][1], grouping=True, symbol=False)
+            st.write(f"Saldo Final no CTB: {saldo_am_formatado}")
+            st.write(f"Saldo Final Contas Bancos no Balancete: {saldo_bal_formatado}")
+        else:
+            st.write("Não foram encontrados dados para o usuário e ano fornecidos.")
+
+        if bancos and bancos[0][0] == bancos[0][1]:
+            st.success("Os valores dos arquivos CTB e Contas Bancárias do BALANCETE são iguais: ✅")
+        else:
+            st.error("Os valores dos arquivos CTB e Contas Bancárias do BALANCETE são diferentes: 🚨")
+            st.write("Dados com diferença nos saldos finais:")
+            diferenca_bancos = buscaDiferencaSaldoFinalBancos(usuario, ano_arquivo_AM)
+            # Exibe os dados da diferença
+            for linha in diferenca_bancos:
+                st.write(f"Ficha: {linha[0]} Fonte de Recurso: {linha[1]} -  Saldo Final no CTB: {locale.currency(linha[2], grouping=True, symbol=False)}, Saldo Final no Balancete: {locale.currency(linha[3], grouping=True, symbol=False)}")
+
+        # Exibe os Empenhos
+
+        st.markdown("**Valores Empenhados:**")
+        empenhos = confereValoresEmpenhados(usuario, ano_arquivo_AM)
+        if empenhos:
+            saldo_am_formatado = locale.currency(empenhos[0][0], grouping=True, symbol=False)
+            saldo_bal_formatado = locale.currency(empenhos[0][1], grouping=True, symbol=False)
+            st.write(f"Valores Empenhados: {saldo_am_formatado}")
+            st.write(f"Valores Empenhados no Balancete: {saldo_bal_formatado}")
+        else:
+            st.write("Não foram encontrados dados para o usuário e ano fornecidos.")
+
+        if empenhos and empenhos[0][0] == empenhos[0][1]:
+            st.success("Os valores dos arquivos EMP e Contabilizados no Balancete são iguais: ✅")
+        else:
+            st.error("Os valores dos arquivos EMP e Contabilizados no Balancete são diferentes: 🚨")
+            st.write("Dados com diferença nos saldos finais:")
+            diferenca_empenhos = buscaDiferencaValoresEmpenhados(usuario, ano_arquivo_AM)
+            # Exibe os dados da diferença
+            for linha in diferenca_empenhos:
+                st.write(f"Funcional: {linha[0]} {linha[1]} {linha[2]} {linha[3]} {linha[4]} {linha[5]} {linha[6]} {linha[7]} {linha[8]} -  EMP: {locale.currency(linha[9], grouping=True, symbol=False)}, Balancete: {locale.currency(linha[10], grouping=True, symbol=False)}")
+
+        # Exibe os Receitas
+
+        st.markdown("**Valores de Receitas:**")
+        receitas = confereValoresReceitas(usuario, ano_arquivo_AM)
+        if receitas:
+            saldo_rec_formatado = locale.currency(receitas[0][0], grouping=True, symbol=False)
+            saldo_ctb_formatado = locale.currency(receitas[0][1], grouping=True, symbol=False)
+            saldo_bal_formatado = locale.currency(receitas[0][2], grouping=True, symbol=False)
+            st.write(f"Valores REC: {saldo_rec_formatado}")
+            st.write(f"Valores CTB: {saldo_ctb_formatado}")
+            st.write(f"Valores Contabilizados no Balancete: {saldo_bal_formatado}")
+        else:
+            st.write("Não foram encontrados dados para o usuário e ano fornecidos.")
+
+        if receitas and receitas[0][0] == receitas[0][1] and receitas[0][0] == receitas[0][2] and receitas[0][1] == receitas[0][2]:
+            st.success("Os valores dos arquivos REC, CTB e Contabilizados no Balancete são iguais: ✅")
+        else:
+            st.error("Os valores dos arquivos REC, CTB e Contabilizados no Balancete são diferentes: 🚨")
+            st.write("Dados com diferença nos saldos finais:")
+            diferenca_receitas = buscaDiferencaValoresReceitas(usuario, ano_arquivo_AM)
+            # Exibe os dados da diferença
+            for linha in diferenca_receitas:
+                st.write(f"Receita: {linha[0]} - Fonte de Recurso: {linha[1]} -  REC: {locale.currency(linha[2], grouping=True, symbol=False)}, CTB: {locale.currency(linha[3], grouping=True, symbol=False)}, Balancete: {locale.currency(linha[4], grouping=True, symbol=False)}")
