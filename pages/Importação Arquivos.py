@@ -4,7 +4,7 @@ import os
 import pandas as pd
 import locale
 from funcoes import *
-from ConsultasSQL import confereSaldoFinalBancos, buscaDiferencaSaldoFinalBancos, confereValoresEmpenhados, buscaDiferencaValoresEmpenhados, confereValoresReceitas, buscaDiferencaValoresReceitas
+from ConsultasSQL import confereSaldoFinalBancos, buscaDiferencaSaldoFinalBancos, confereValoresEmpenhados, buscaDiferencaValoresEmpenhados, confereValoresReceitas, buscaDiferencaValoresReceitas, buscaValoresConciliacaoBancaria
 from sqlalchemy import create_engine
 from zipfile import ZipFile
 import VariaveisGlobais
@@ -176,6 +176,7 @@ if tudoOK:
                         nome_arquivo == 'ARC' or \
                         nome_arquivo == 'CAIXA' or \
                         nome_arquivo == 'CTB' or \
+                        nome_arquivo == 'CONCIBANC' or \
                         nome_arquivo == 'CUTE' or \
                         nome_arquivo == 'EMP' or \
                         nome_arquivo == 'EXT' or \
@@ -277,6 +278,10 @@ if tudoOK:
         my_bar_AM.empty()
         my_bar_BAL.empty()
 
+########################################################################################################################################################################################
+###################################################################################### RESULTADOS ######################################################################################
+########################################################################################################################################################################################
+
         st.subheader("Resultados", divider='rainbow')
 
         locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')
@@ -297,12 +302,29 @@ if tudoOK:
         if bancos and bancos[0][0] == bancos[0][1]:
             st.success("Os valores dos arquivos CTB e Contas Bancárias do BALANCETE são iguais: ✅")
         else:
-            st.error("Os valores dos arquivos CTB e Contas Bancárias do BALANCETE são diferentes: 🚨")
+            st.warning("Os valores dos arquivos CTB e Contas Bancárias do BALANCETE são diferentes: ⚠️")
             st.write("Dados com diferença nos saldos finais:")
             diferenca_bancos = buscaDiferencaSaldoFinalBancos(usuario, ano_arquivo_AM)
             # Exibe os dados da diferença
             for linha in diferenca_bancos:
                 st.write(f"Ficha: {linha[0]} Fonte de Recurso: {linha[1]} -  Saldo Final no CTB: {locale.currency(linha[2], grouping=True, symbol=False)}, Saldo Final no Balancete: {locale.currency(linha[3], grouping=True, symbol=False)}")
+            
+            concilicacao_bancos = buscaValoresConciliacaoBancaria(usuario, ano_arquivo_AM)
+            # Exibe Conciliacao Bancaria
+            if concilicacao_bancos:
+                for linha in concilicacao_bancos:
+                    if linha[1] == '1':
+                        st.write(f"Ficha: {linha[0]} Entradas contabilizadas e não consideradas no extrato bancário: {locale.currency(linha[2], grouping=True, symbol=False)}")
+                    elif linha[1] == '2':
+                        st.write(f"Ficha: {linha[0]} Saídas contabilizadas e não consideradas no extrato bancário: {locale.currency(linha[2], grouping=True, symbol=False)}")
+                    elif linha[1] == '3':
+                        st.write(f"Ficha: {linha[0]} Entradas não consideradas pela contabilidade: {locale.currency(linha[2], grouping=True, symbol=False)}")
+                    elif linha[1] == '4':
+                        st.write(f"Ficha: {linha[0]} Saídas não consideradas pela contabilidade: {locale.currency(linha[2], grouping=True, symbol=False)}")
+                    else:
+                        st.write("Valor desconhecido")
+            else:
+                st.warning("Foi encontrado diferença entre o CTB e Balancete e não possui informação de Conciliação Bancária: ⚠️")
 
         # Exibe os Empenhos
 
@@ -319,7 +341,7 @@ if tudoOK:
         if empenhos and empenhos[0][0] == empenhos[0][1]:
             st.success("Os valores dos arquivos EMP e Contabilizados no Balancete são iguais: ✅")
         else:
-            st.error("Os valores dos arquivos EMP e Contabilizados no Balancete são diferentes: 🚨")
+            st.warning("Os valores dos arquivos EMP e Contabilizados no Balancete são diferentes: ⚠️")
             st.write("Dados com diferença nos saldos finais:")
             diferenca_empenhos = buscaDiferencaValoresEmpenhados(usuario, ano_arquivo_AM)
             # Exibe os dados da diferença
@@ -343,7 +365,7 @@ if tudoOK:
         if receitas and receitas[0][0] == receitas[0][1] and receitas[0][0] == receitas[0][2] and receitas[0][1] == receitas[0][2]:
             st.success("Os valores dos arquivos REC, CTB e Contabilizados no Balancete são iguais: ✅")
         else:
-            st.error("Os valores dos arquivos REC, CTB e Contabilizados no Balancete são diferentes: 🚨")
+            st.warning("Os valores dos arquivos REC, CTB e Contabilizados no Balancete são diferentes: ⚠️")
             st.write("Dados com diferença nos saldos finais:")
             diferenca_receitas = buscaDiferencaValoresReceitas(usuario, ano_arquivo_AM)
             # Exibe os dados da diferença
