@@ -879,3 +879,27 @@ def buscaDiferencaValoresReceitas(usuario,ano):
     cursor.close()
 
     return dados
+
+def buscaValoresConciliacaoBancaria(usuario,ano):
+
+    cursor = connection.conn.cursor()
+
+    # Consulta SQL
+    consulta = """
+        SELECT CAST(SEQ3 AS DECIMAL(20,0)) AS FICHA, SEQ4 AS TIPOCONCBANC, SUM(CAST(REPLACE(SEQ9, ',', '.') AS NUMERIC)) AS VALOR
+        FROM TCE_SICOM
+        WHERE MODULO = 'AM'
+        AND ARQUIVO = 'CONCIBANC'
+        AND SEQ1 = '11'
+        AND USUARIO = %s
+        AND ANO = %s
+        GROUP BY CAST(SEQ3 AS DECIMAL(20,0)), SEQ4
+        ORDER BY CAST(SEQ3 AS DECIMAL(20,0)), SEQ4
+    """
+
+    cursor.execute(consulta, (usuario,ano,))
+    dados = cursor.fetchall()
+
+    cursor.close()
+
+    return dados
