@@ -9,7 +9,26 @@ from sqlalchemy import create_engine
 from zipfile import ZipFile
 import VariaveisGlobais
 
+st.set_page_config(
+    layout="wide",
+    initial_sidebar_state="collapsed"
+)
 
+if 'cod_municipio_AM' not in st.session_state:
+    st.session_state.cod_municipio_AM = None
+    st.session_state.cod_orgao = None
+    st.session_state.mes = None
+    st.session_state.ano = None
+
+if st.session_state.cod_municipio_AM:
+    st.sidebar.subheader(":red[Dados de Importação:]")
+    st.sidebar.write(f"Código Município: {st.session_state.cod_municipio_AM}")
+    st.sidebar.write(f"Código Orgão: {st.session_state.cod_orgao}")
+    st.sidebar.write(f"Mês: {st.session_state.mes}")
+    st.sidebar.write(f"Ano: {st.session_state.ano}")
+
+
+st.subheader("Importação dos arquivos Acompanhamento Mensal (AM) e Balancete", divider='rainbow')
 
 # engine = create_engine('postgresql://jsmcfbqq:dzYLD0UV56ksursrQrP4fHMi_f1X116e@silly.db.elephantsql.com/jsmcfbqq') -> Elephant
 engine = create_engine('postgresql://uberabpm:SICSADM@34.86.191.201/uberabpm')
@@ -26,8 +45,6 @@ css = '''
     </style>
     '''
 st.markdown(css, unsafe_allow_html=True)
-
-st.subheader("Importação dos arquivos Acompanhamento Mensal (AM) e Balancete", divider='rainbow')
 
 tudoOK = True
 ano_arquivo_AM = ano_arquivo_Bal = None
@@ -51,15 +68,19 @@ with col1:
 
         # pega o cod Municipio do AM
         cod_municipio_AM = arquivo[1]
+        st.session_state.cod_municipio_AM = cod_municipio_AM
 
         # pega o orgao do AM
         cod_orgao_AM = arquivo[2]
+        st.session_state.cod_orgao = cod_orgao_AM
 
         # pega o Mes do AM
         mes_AM = arquivo[3]
+        st.session_state.mes = mes_AM
 
         # pegar no ano no arquivo AM
         ano_arquivo_AM = int(arquivo[4][0:4])
+        st.session_state.ano = ano_arquivo_AM
     else:
         tudoOK = False
 
@@ -282,15 +303,15 @@ if tudoOK:
 ###################################################################################### RESULTADOS ######################################################################################
 ########################################################################################################################################################################################
 
-        st.subheader("Resultados", divider='rainbow')
+        st.subheader("Resultado da Apuração", divider='rainbow')
 
         locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')
 
         # Exibe os dados bancários
-
         bancos = confereSaldoFinalBancos(usuario, ano_arquivo_AM)
 
-        st.markdown("**Contas Bancárias:**")
+        # st.markdown(":red[**Contas Bancárias:**]")
+        st.subheader(":red[Contas Bancárias:]")
         if bancos:
             saldo_am_formatado = locale.currency(bancos[0][0], grouping=True, symbol=False)
             saldo_bal_formatado = locale.currency(bancos[0][1], grouping=True, symbol=False)
@@ -302,13 +323,14 @@ if tudoOK:
         if bancos and bancos[0][0] == bancos[0][1]:
             st.success("Os valores dos arquivos CTB e Contas Bancárias do BALANCETE são iguais: ✅")
         else:
-            st.warning("Os valores dos arquivos CTB e Contas Bancárias do BALANCETE são diferentes: ⚠️")
-            st.write("Dados com diferença nos saldos finais:")
-            diferenca_bancos = buscaDiferencaSaldoFinalBancos(usuario, ano_arquivo_AM)
             # Exibe os dados da diferença
-            for linha in diferenca_bancos:
-                st.write(f"Ficha: {linha[0]} Fonte de Recurso: {linha[1]} -  Saldo Final no CTB: {locale.currency(linha[2], grouping=True, symbol=False)}, Saldo Final no Balancete: {locale.currency(linha[3], grouping=True, symbol=False)}")
-            
+            st.warning("Os valores dos arquivos CTB e Contas Bancárias do BALANCETE são diferentes: ⚠️")
+            # st.write("Dados com diferença nos saldos finais:")
+            diferenca_bancos = buscaDiferencaSaldoFinalBancos(usuario, ano_arquivo_AM)
+            with st.expander("Dados com diferença nos saldos finais:"):
+                for linha in diferenca_bancos:
+                    st.write(f"Ficha: {linha[0]} Fonte de Recurso: {linha[1]} -  Saldo Final no CTB: {locale.currency(linha[2], grouping=True, symbol=False)}, Saldo Final no Balancete: {locale.currency(linha[3], grouping=True, symbol=False)}")
+                
             concilicacao_bancos = buscaValoresConciliacaoBancaria(usuario, ano_arquivo_AM)
             # Exibe Conciliacao Bancaria
             if concilicacao_bancos:
@@ -326,9 +348,11 @@ if tudoOK:
             else:
                 st.warning("Foi encontrado diferença entre o CTB e Balancete e não possui informação de Conciliação Bancária: ⚠️")
 
-        # Exibe os Empenhos
+        st.divider()
 
-        st.markdown("**Valores Empenhados:**")
+        # Exibe os Empenhos
+        # st.markdown("**Valores Empenhados:**")
+        st.subheader(":red[Valores Empenhados:]")
         empenhos = confereValoresEmpenhados(usuario, ano_arquivo_AM)
         if empenhos:
             saldo_am_formatado = locale.currency(empenhos[0][0], grouping=True, symbol=False)
@@ -341,16 +365,19 @@ if tudoOK:
         if empenhos and empenhos[0][0] == empenhos[0][1]:
             st.success("Os valores dos arquivos EMP e Contabilizados no Balancete são iguais: ✅")
         else:
-            st.warning("Os valores dos arquivos EMP e Contabilizados no Balancete são diferentes: ⚠️")
-            st.write("Dados com diferença nos saldos finais:")
-            diferenca_empenhos = buscaDiferencaValoresEmpenhados(usuario, ano_arquivo_AM)
             # Exibe os dados da diferença
-            for linha in diferenca_empenhos:
-                st.write(f"Funcional: {linha[0]} {linha[1]} {linha[2]} {linha[3]} {linha[4]} {linha[5]} {linha[6]} {linha[7]} {linha[8]} -  EMP: {locale.currency(linha[9], grouping=True, symbol=False)}, Balancete: {locale.currency(linha[10], grouping=True, symbol=False)}")
+            st.warning("Os valores dos arquivos EMP e Contabilizados no Balancete são diferentes: ⚠️")
+            # st.write("Dados com diferença nos saldos finais:")
+            diferenca_empenhos = buscaDiferencaValoresEmpenhados(usuario, ano_arquivo_AM)
+            with st.expander("Dados com diferença nos saldos finais:"):
+                for linha in diferenca_empenhos:
+                    st.write(f"Funcional: {linha[0]} {linha[1]} {linha[2]} {linha[3]} {linha[4]} {linha[5]} {linha[6]} {linha[7]} {linha[8]} -  EMP: {locale.currency(linha[9], grouping=True, symbol=False)}, Balancete: {locale.currency(linha[10], grouping=True, symbol=False)}")
+
+        st.divider()
 
         # Exibe os Receitas
-
-        st.markdown("**Valores de Receitas:**")
+        # st.markdown("**Valores de Receitas:**")
+        st.subheader(":red[Valores de Receitas:]")        
         receitas = confereValoresReceitas(usuario, ano_arquivo_AM)
         if receitas:
             saldo_rec_formatado = locale.currency(receitas[0][0], grouping=True, symbol=False)
@@ -365,9 +392,12 @@ if tudoOK:
         if receitas and receitas[0][0] == receitas[0][1] and receitas[0][0] == receitas[0][2] and receitas[0][1] == receitas[0][2]:
             st.success("Os valores dos arquivos REC, CTB e Contabilizados no Balancete são iguais: ✅")
         else:
-            st.warning("Os valores dos arquivos REC, CTB e Contabilizados no Balancete são diferentes: ⚠️")
-            st.write("Dados com diferença nos saldos finais:")
-            diferenca_receitas = buscaDiferencaValoresReceitas(usuario, ano_arquivo_AM)
             # Exibe os dados da diferença
-            for linha in diferenca_receitas:
-                st.write(f"Receita: {linha[0]} - Fonte de Recurso: {linha[1]} -  REC: {locale.currency(linha[2], grouping=True, symbol=False)}, CTB: {locale.currency(linha[3], grouping=True, symbol=False)}, Balancete: {locale.currency(linha[4], grouping=True, symbol=False)}")
+            st.warning("Os valores dos arquivos REC, CTB e Contabilizados no Balancete são diferentes: ⚠️")
+            # st.write("Dados com diferença nos saldos finais:")
+            diferenca_receitas = buscaDiferencaValoresReceitas(usuario, ano_arquivo_AM)
+            with st.expander("Dados com diferença nos saldos finais:"):
+                for linha in diferenca_receitas:
+                    st.write(f"Receita: {linha[0]} - Fonte de Recurso: {linha[1]} -  REC: {locale.currency(linha[2], grouping=True, symbol=False)}, CTB: {locale.currency(linha[3], grouping=True, symbol=False)}, Balancete: {locale.currency(linha[4], grouping=True, symbol=False)}")
+
+        st.divider()
