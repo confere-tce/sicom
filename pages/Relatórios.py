@@ -33,7 +33,7 @@ st.divider()
 
 if st.button("Imprimir"):
     if relatorios == 'Analítico de Despesa':
-        dados = relatorioAnaliticoEmpenho(usuarioGlobal, anoGlobal)
+        dados = relatorioAnaliticoEmpenho(usuarioGlobal, st.session_state.ano)
 
         # Exibe os dados em uma tabela
         if dados:

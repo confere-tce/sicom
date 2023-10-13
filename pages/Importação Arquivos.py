@@ -310,13 +310,15 @@ if tudoOK:
         # Exibe os dados bancários
         bancos = confereSaldoFinalBancos(usuario, ano_arquivo_AM)
 
-        # st.markdown(":red[**Contas Bancárias:**]")
         st.subheader(":red[Contas Bancárias:]")
         if bancos:
             saldo_am_formatado = locale.currency(bancos[0][0], grouping=True, symbol=False)
             saldo_bal_formatado = locale.currency(bancos[0][1], grouping=True, symbol=False)
+            diferenca = abs(bancos[0][0] - bancos[0][1] )
             st.write(f"Saldo Final no CTB: {saldo_am_formatado}")
             st.write(f"Saldo Final Contas Bancos no Balancete: {saldo_bal_formatado}")
+            if diferenca > 0:
+                st.write(f"Diferença encontrada: {locale.currency(diferenca, grouping=True, symbol=False)}")
         else:
             st.write("Não foram encontrados dados para o usuário e ano fornecidos.")
 
@@ -351,7 +353,6 @@ if tudoOK:
         st.divider()
 
         # Exibe os Empenhos
-        # st.markdown("**Valores Empenhados:**")
         st.subheader(":red[Valores Empenhados:]")
         empenhos = confereValoresEmpenhados(usuario, ano_arquivo_AM)
         if empenhos:
@@ -376,7 +377,6 @@ if tudoOK:
         st.divider()
 
         # Exibe os Receitas
-        # st.markdown("**Valores de Receitas:**")
         st.subheader(":red[Valores de Receitas:]")        
         receitas = confereValoresReceitas(usuario, ano_arquivo_AM)
         if receitas:
