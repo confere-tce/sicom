@@ -14,6 +14,8 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
+esconde_objetos_streamlit(st)
+
 if 'cod_municipio_AM' not in st.session_state:
     st.session_state.cod_municipio_AM = None
     st.session_state.cod_orgao = None
@@ -26,7 +28,6 @@ if st.session_state.cod_municipio_AM:
     st.sidebar.write(f"Código Orgão: {st.session_state.cod_orgao}")
     st.sidebar.write(f"Mês: {st.session_state.mes}")
     st.sidebar.write(f"Ano: {st.session_state.ano}")
-
 
 st.subheader("Importação dos arquivos Acompanhamento Mensal (AM) e Balancete", divider='rainbow')
 
@@ -134,7 +135,7 @@ if mes_AM is not None and mes_BAL is not None and mes_AM != mes_BAL:
 st.divider()
 
 if tudoOK:
-    if st.button("Processar o Arquivo", type="primary"):
+    if st.button("Processar os arquivos", type="primary"):
 
         usuario = 'USUARIO'  # teste, depois pegar o usuario logado
 
@@ -241,7 +242,9 @@ if tudoOK:
                     
 
         st.success(
-            "Arquivo 'ACOMPANHAMENTO MENSAL (AM)' Importado com Sucesso", icon="✅")
+            "Arquivo ACOMPANHAMENTO MENSAL (AM) Importado com Sucesso", icon="✅")
+        
+        my_bar_AM.empty()
 
         # Carregando os arquivos Balancete
         my_bar_BAL = st.progress(0, text="")
@@ -291,12 +294,11 @@ if tudoOK:
                               if_exists='append', index=False)
                     
 
-        st.success("Arquivo 'BALANCETE' Importado com Sucesso", icon="✅")
+        st.success("Arquivo BALANCETE Importado com Sucesso", icon="✅")
 
         # Deletando a pasta depois do processamento
         deletando_pasta(pasta_temp)
 
-        my_bar_AM.empty()
         my_bar_BAL.empty()
 
 ########################################################################################################################################################################################
@@ -307,59 +309,81 @@ if tudoOK:
 
         locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')
 
-        # Exibe os dados bancários
+        ######## DADOS BANCÁRIOS ############
+        st.subheader(":red[Contas Bancárias:]")
+
         bancos = confereSaldoFinalBancos(usuario, ano_arquivo_AM)
 
-        st.subheader(":red[Contas Bancárias:]")
         if bancos:
             saldo_am_formatado = locale.currency(bancos[0][0], grouping=True, symbol=False)
             saldo_bal_formatado = locale.currency(bancos[0][1], grouping=True, symbol=False)
             diferenca = abs(bancos[0][0] - bancos[0][1] )
-            st.write(f"Saldo Final no CTB: {saldo_am_formatado}")
-            st.write(f"Saldo Final Contas Bancos no Balancete: {saldo_bal_formatado}")
-            if diferenca > 0:
-                st.write(f"Diferença encontrada: {locale.currency(diferenca, grouping=True, symbol=False)}")
+
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                st.write("Saldo Final no CTB")   
+                st.write(f"R$ {saldo_am_formatado}")
+            with col2:
+                st.write("Saldos Contabilizados no Balancete")
+                st.write(f"R$ {saldo_bal_formatado}")
+            with col3:
+                if diferenca > 0:
+                    st.write("Diferença encontrada")
+                    st.write(f"R$ {locale.currency(diferenca, grouping=True, symbol=False)}")
         else:
-            st.write("Não foram encontrados dados para o usuário e ano fornecidos.")
+            st.write("Não foram encontrados dados para o usuário e ano fornecidos")
 
         if bancos and bancos[0][0] == bancos[0][1]:
             st.success("Os valores dos arquivos CTB e Contas Bancárias do BALANCETE são iguais: ✅")
         else:
             # Exibe os dados da diferença
             st.warning("Os valores dos arquivos CTB e Contas Bancárias do BALANCETE são diferentes: ⚠️")
-            # st.write("Dados com diferença nos saldos finais:")
+
             diferenca_bancos = buscaDiferencaSaldoFinalBancos(usuario, ano_arquivo_AM)
             with st.expander("Dados com diferença nos saldos finais:"):
                 for linha in diferenca_bancos:
-                    st.write(f"Ficha: {linha[0]} Fonte de Recurso: {linha[1]} -  Saldo Final no CTB: {locale.currency(linha[2], grouping=True, symbol=False)}, Saldo Final no Balancete: {locale.currency(linha[3], grouping=True, symbol=False)}")
+                    st.write(f"Ficha: {linha[0]} Fonte de Recurso: {linha[1]} -  Saldo Final no CTB: {locale.currency(linha[2], grouping=True, symbol=False)} - Saldo Final no Balancete: {locale.currency(linha[3], grouping=True, symbol=False)}")
                 
-            concilicacao_bancos = buscaValoresConciliacaoBancaria(usuario, ano_arquivo_AM)
             # Exibe Conciliacao Bancaria
+            concilicacao_bancos = buscaValoresConciliacaoBancaria(usuario, ano_arquivo_AM)
             if concilicacao_bancos:
-                for linha in concilicacao_bancos:
-                    if linha[1] == '1':
-                        st.write(f"Ficha: {linha[0]} Entradas contabilizadas e não consideradas no extrato bancário: {locale.currency(linha[2], grouping=True, symbol=False)}")
-                    elif linha[1] == '2':
-                        st.write(f"Ficha: {linha[0]} Saídas contabilizadas e não consideradas no extrato bancário: {locale.currency(linha[2], grouping=True, symbol=False)}")
-                    elif linha[1] == '3':
-                        st.write(f"Ficha: {linha[0]} Entradas não consideradas pela contabilidade: {locale.currency(linha[2], grouping=True, symbol=False)}")
-                    elif linha[1] == '4':
-                        st.write(f"Ficha: {linha[0]} Saídas não consideradas pela contabilidade: {locale.currency(linha[2], grouping=True, symbol=False)}")
-                    else:
-                        st.write("Valor desconhecido")
+                with st.expander("Informações de Conciliação Bancária"):
+                    for linha in concilicacao_bancos:
+                        if linha[1] == '1':
+                            st.write(f"Ficha: {linha[0]} Entradas contabilizadas e não consideradas no extrato bancário: {locale.currency(linha[2], grouping=True, symbol=False)}")
+                        elif linha[1] == '2':
+                            st.write(f"Ficha: {linha[0]} Saídas contabilizadas e não consideradas no extrato bancário: {locale.currency(linha[2], grouping=True, symbol=False)}")
+                        elif linha[1] == '3':
+                            st.write(f"Ficha: {linha[0]} Entradas não consideradas pela contabilidade: {locale.currency(linha[2], grouping=True, symbol=False)}")
+                        elif linha[1] == '4':
+                            st.write(f"Ficha: {linha[0]} Saídas não consideradas pela contabilidade: {locale.currency(linha[2], grouping=True, symbol=False)}")
+                        else:
+                            st.write("Valor desconhecido")
             else:
                 st.warning("Foi encontrado diferença entre o CTB e Balancete e não possui informação de Conciliação Bancária: ⚠️")
 
         st.divider()
 
-        # Exibe os Empenhos
+        ######## DADOS EMPENHOS ############
         st.subheader(":red[Valores Empenhados:]")
+
         empenhos = confereValoresEmpenhados(usuario, ano_arquivo_AM)
         if empenhos:
             saldo_am_formatado = locale.currency(empenhos[0][0], grouping=True, symbol=False)
             saldo_bal_formatado = locale.currency(empenhos[0][1], grouping=True, symbol=False)
-            st.write(f"Valores Empenhados: {saldo_am_formatado}")
-            st.write(f"Valores Empenhados no Balancete: {saldo_bal_formatado}")
+            diferenca = abs(empenhos[0][0] - empenhos[0][1] )
+            
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                st.write("Valores Empenhados")
+                st.write(f"R$ {saldo_am_formatado}")
+            with col2:
+                st.write("Valores Contabilizados no Balancete")
+                st.write(f"R$ {saldo_bal_formatado}")
+            with col3:
+                if diferenca > 0:
+                    st.write("Diferença encontrada")
+                    st.write(f"R$ {locale.currency(diferenca, grouping=True, symbol=False)}")
         else:
             st.write("Não foram encontrados dados para o usuário e ano fornecidos.")
 
@@ -368,36 +392,44 @@ if tudoOK:
         else:
             # Exibe os dados da diferença
             st.warning("Os valores dos arquivos EMP e Contabilizados no Balancete são diferentes: ⚠️")
-            # st.write("Dados com diferença nos saldos finais:")
             diferenca_empenhos = buscaDiferencaValoresEmpenhados(usuario, ano_arquivo_AM)
             with st.expander("Dados com diferença nos saldos finais:"):
                 for linha in diferenca_empenhos:
-                    st.write(f"Funcional: {linha[0]} {linha[1]} {linha[2]} {linha[3]} {linha[4]} {linha[5]} {linha[6]} {linha[7]} {linha[8]} -  EMP: {locale.currency(linha[9], grouping=True, symbol=False)}, Balancete: {locale.currency(linha[10], grouping=True, symbol=False)}")
+                    st.write(f"Funcional: {linha[0]} {linha[1]} {linha[2]} {linha[3]} {linha[4]} {linha[5]} {linha[6]} {linha[7]} {linha[8]} -  EMP: {locale.currency(linha[9], grouping=True, symbol=False)} - Balancete: {locale.currency(linha[10], grouping=True, symbol=False)}")
 
         st.divider()
 
-        # Exibe os Receitas
-        st.subheader(":red[Valores de Receitas:]")        
+        ######## DADOS RECEITAS ############
+        st.subheader(":red[Valores de Receitas:]")
+
         receitas = confereValoresReceitas(usuario, ano_arquivo_AM)
         if receitas:
             saldo_rec_formatado = locale.currency(receitas[0][0], grouping=True, symbol=False)
-            saldo_ctb_formatado = locale.currency(receitas[0][1], grouping=True, symbol=False)
             saldo_bal_formatado = locale.currency(receitas[0][2], grouping=True, symbol=False)
-            st.write(f"Valores REC: {saldo_rec_formatado}")
-            st.write(f"Valores CTB: {saldo_ctb_formatado}")
-            st.write(f"Valores Contabilizados no Balancete: {saldo_bal_formatado}")
+            diferenca = abs(receitas[0][0] - receitas[0][2] )
+
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                st.write("Valores Receita")
+                st.write(f"R$: {saldo_rec_formatado}")
+            with col2:
+                st.write("Valores Contabilizados no Balancete")
+                st.write(f"R$ {saldo_bal_formatado}")
+            with col3:
+                if diferenca > 0:
+                    st.write("Diferença encontrada")
+                    st.write(f"R$ {locale.currency(diferenca, grouping=True, symbol=False)}")
         else:
             st.write("Não foram encontrados dados para o usuário e ano fornecidos.")
 
-        if receitas and receitas[0][0] == receitas[0][1] and receitas[0][0] == receitas[0][2] and receitas[0][1] == receitas[0][2]:
-            st.success("Os valores dos arquivos REC, CTB e Contabilizados no Balancete são iguais: ✅")
+        if receitas and receitas[0][0] == receitas[0][2]:
+            st.success("Os valores dos arquivos REC e Contabilizados no Balancete são iguais: ✅")
         else:
             # Exibe os dados da diferença
-            st.warning("Os valores dos arquivos REC, CTB e Contabilizados no Balancete são diferentes: ⚠️")
-            # st.write("Dados com diferença nos saldos finais:")
+            st.warning("Os valores dos arquivos REC e Contabilizados no Balancete são diferentes: ⚠️")
             diferenca_receitas = buscaDiferencaValoresReceitas(usuario, ano_arquivo_AM)
             with st.expander("Dados com diferença nos saldos finais:"):
                 for linha in diferenca_receitas:
-                    st.write(f"Receita: {linha[0]} - Fonte de Recurso: {linha[1]} -  REC: {locale.currency(linha[2], grouping=True, symbol=False)}, CTB: {locale.currency(linha[3], grouping=True, symbol=False)}, Balancete: {locale.currency(linha[4], grouping=True, symbol=False)}")
+                    st.write(f"Receita: {linha[0]} - Fonte de Recurso: {linha[1]} -  REC: {locale.currency(linha[2], grouping=True, symbol=False)} - Balancete: {locale.currency(linha[3], grouping=True, symbol=False)}")
 
         st.divider()

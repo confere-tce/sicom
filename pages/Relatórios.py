@@ -2,13 +2,15 @@ import streamlit as st
 import pandas as pd
 from ConsultasSQL import *
 from VariaveisGlobais import usuarioGlobal, anoGlobal
-from funcoes import exportar_pdf, exportar_excel
+from funcoes import *
 
 
 st.set_page_config(
     layout="wide",
     initial_sidebar_state="collapsed"
 )
+
+esconde_objetos_streamlit(st)
 
 if 'cod_municipio_AM' not in st.session_state:
     st.session_state.cod_municipio_AM = None

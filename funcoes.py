@@ -124,3 +124,20 @@ def exportar_excel(df, filename):
         print(f'Ocorreu um erro ao exportar para Excel: {str(e)}')
 
 
+def esconde_objetos_streamlit(st):
+    hide_menu = """
+        <style>
+        #MainMenu{
+            visibility: hidden;
+        }
+
+        .stDeployButton{
+            visibility: hidden;
+        }
+
+        footer{
+            visibility: hidden;
+        }
+        </style>
+        """
+    st.markdown(hide_menu, unsafe_allow_html=True)
