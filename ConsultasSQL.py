@@ -50,6 +50,7 @@ def relatorioAnaliticoEmpenho(usuario, ano):
         JOIN TCE_SICOM B ON ( A.ARQUIVO  = B.ARQUIVO AND B.SEQ1 = '11' AND A.SEQ2 = B.SEQ2 AND A.USUARIO = B.USUARIO )
         WHERE A.ARQUIVO = 'ALQ' 
         AND A.SEQ1 = '10'
+        AND A.SEQ11 = '1'
         GROUP BY A.USUARIO, A.ANO, A.SEQ5, B.SEQ3, B.SEQ4
 
         UNION ALL 
@@ -67,6 +68,7 @@ def relatorioAnaliticoEmpenho(usuario, ano):
         FROM TCE_SICOM A
         WHERE A.ARQUIVO = 'AOP' 
         AND A.SEQ1 = '11'
+        AND A.SEQ9 IN ('1','2')
         GROUP BY A.USUARIO, A.ANO, A.SEQ10, A.SEQ14, A.SEQ15) X
         WHERE 1=1
         AND X.USUARIO = %s
@@ -255,19 +257,21 @@ def totalizaMovimentosPorFonte(usuario, ano):
 
         UNION ALL
 
-        SELECT USUARIO, ANO, SEQ6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, SUM(CAST(REPLACE(SEQ9, ',', '.') AS NUMERIC)) AS PAGAMENTO, 0, 0, 0, 0
-        FROM TCE_SICOM
-        WHERE ARQUIVO = 'OPS' 
-        AND SEQ1 = '12'
-        GROUP BY USUARIO, ANO, SEQ6
+        SELECT A.USUARIO, A.ANO, B.SEQ11, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, SUM(CAST(REPLACE(A.SEQ9, ',', '.') AS NUMERIC)) AS PAGAMENTO, 0, 0, 0, 0
+        FROM TCE_SICOM A
+        JOIN TCE_SICOM B ON (A.USUARIO = B.USUARIO AND A.ANO = B.ANO AND A.ARQUIVO = B.ARQUIVO AND B.SEQ1 = '11' AND A.SEQ2 = B.SEQ2)
+        WHERE A.ARQUIVO = 'OPS' 
+        AND A.SEQ1 = '12'
+        GROUP BY A.USUARIO, A.ANO, B.SEQ11
 
         UNION ALL
 
-        SELECT USUARIO, ANO, SEQ6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, SUM(CAST(REPLACE(SEQ9, ',', '.') AS NUMERIC)) AS ANULPAGAMENTO, 0, 0, 0
-        FROM TCE_SICOM
-        WHERE ARQUIVO = 'AOP' 
-        AND SEQ1 = '12'
-        GROUP BY USUARIO, ANO, SEQ6
+        SELECT A.USUARIO, A.ANO, B.SEQ14, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, SUM(CAST(REPLACE(A.SEQ9, ',', '.') AS NUMERIC)) AS ANULPAGAMENTO, 0, 0, 0
+        FROM TCE_SICOM A
+        JOIN TCE_SICOM B ON (A.USUARIO = B.USUARIO AND A.ANO = B.ANO AND A.ARQUIVO = B.ARQUIVO AND B.SEQ1 = '11' AND A.SEQ2 = B.SEQ2)
+        WHERE A.ARQUIVO = 'AOP' 
+        AND A.SEQ1 = '12'
+        GROUP BY A.USUARIO, A.ANO, B.SEQ14
 
         UNION ALL
 
