@@ -7,7 +7,6 @@ from funcoes import *
 from ConsultasSQL import confereSaldoFinalBancos, buscaDiferencaSaldoFinalBancos, confereValoresEmpenhados, buscaDiferencaValoresEmpenhados, confereValoresReceitas, buscaDiferencaValoresReceitas, buscaValoresConciliacaoBancaria
 from sqlalchemy import create_engine
 from zipfile import ZipFile
-import VariaveisGlobais
 from streamlit_extras.metric_cards import style_metric_cards
 from streamlit_extras.add_vertical_space import add_vertical_space
 
@@ -23,6 +22,7 @@ if 'cod_municipio_AM' not in st.session_state:
     st.session_state.cod_orgao = None
     st.session_state.mes = None
     st.session_state.ano = None
+    st.session_state.usuario = None
 
 if st.session_state.cod_municipio_AM:
     st.sidebar.subheader(":red[Dados de Importação:]")
@@ -30,6 +30,12 @@ if st.session_state.cod_municipio_AM:
     st.sidebar.write(f"Código Orgão: {st.session_state.cod_orgao}")
     st.sidebar.write(f"Mês: {st.session_state.mes}")
     st.sidebar.write(f"Ano: {st.session_state.ano}")
+    st.sidebar.write(f"Usuário: {st.session_state.usuario}")
+
+# usuario = 'USER'  # RANZATTI, teste, depois pegar o usuario logado
+usuario = 'USER1'  # GUSTAVO, teste, depois pegar o usuario logado
+st.session_state.usuario = usuario
+
 
 st.subheader("Importação dos arquivos Acompanhamento Mensal (AM) e Balancete", divider='rainbow')
 
@@ -84,6 +90,7 @@ with col1:
         # pegar no ano no arquivo AM
         ano_arquivo_AM = int(arquivo[4][0:4])
         st.session_state.ano = ano_arquivo_AM
+
     else:
         tudoOK = False
 
@@ -139,8 +146,6 @@ st.divider()
 if tudoOK:
     if st.button("Processar os arquivos", type="primary"):
 
-        usuario = 'RANZATTI'  # teste, depois pegar o usuario logado
-
         # deletando informaçoes da tabela
         connection.delete(usuario)
 
@@ -180,7 +185,7 @@ if tudoOK:
         quantidade_arquivos = len(os.listdir(pasta_AM))
 
         for arquivo_csv in os.listdir(pasta_AM):
-            if arquivo_csv.endswith('.csv'.upper()):
+            if arquivo_csv.upper().endswith('.CSV'):
 
                 my_bar_AM.progress(int(indice / quantidade_arquivos * 100),
                                    text="Processando arquivo Acompanhamento Mensal (AM)... aguarde")
@@ -188,7 +193,7 @@ if tudoOK:
 
                 # Pegando o nome do arquivo
                 x = arquivo_csv.rfind(".")
-                nome_arquivo = arquivo_csv[:x]
+                nome_arquivo = arquivo_csv[:x].upper()
 
                 processa = False
                 if nome_arquivo == 'AEX' or \
@@ -240,8 +245,6 @@ if tudoOK:
                     df.to_sql('tce_sicom', engine,
                               if_exists='append', index=False)
                     
-                    VariaveisGlobais.definir_variaveis_globais(ano_arquivo_AM, usuario)
-                    
 
         st.success(
             "Arquivo ACOMPANHAMENTO MENSAL (AM) Importado com Sucesso", icon="✅")
@@ -255,7 +258,7 @@ if tudoOK:
         quantidade_arquivos = len(os.listdir(pasta_BAL))
 
         for arquivo_csv in os.listdir(pasta_BAL):
-            if arquivo_csv.endswith('.csv'.upper()):
+            if arquivo_csv.upper().endswith('.CSV'):
 
                 my_bar_BAL.progress(int(indice / quantidade_arquivos * 100),
                                     text="Processando arquivo Balancete... aguarde")
@@ -263,7 +266,7 @@ if tudoOK:
 
                 # Pegando o nome do arquivo
                 x = arquivo_csv.rfind(".")
-                nome_arquivo = arquivo_csv[:x]
+                nome_arquivo = arquivo_csv[:x].upper()
 
                 processa = False
                 if nome_arquivo == 'BALANCETE':
@@ -314,7 +317,7 @@ if tudoOK:
         ######## DADOS BANCÁRIOS ############
         st.subheader(":red[Contas Bancárias:]")
 
-        bancos = confereSaldoFinalBancos(usuario, ano_arquivo_AM)
+        bancos = confereSaldoFinalBancos(st.session_state.usuario, st.session_state.ano)
         if bancos:
             saldo_am_formatado = locale.currency(bancos[0][0], grouping=True, symbol=False)
             saldo_bal_formatado = locale.currency(bancos[0][1], grouping=True, symbol=False)
@@ -345,13 +348,13 @@ if tudoOK:
                 # Exibe os dados da diferença
                 st.warning("Os valores dos arquivos CTB e Contas Bancárias do BALANCETE são diferentes: ⚠️")
 
-                diferenca_bancos = buscaDiferencaSaldoFinalBancos(usuario, ano_arquivo_AM)
+                diferenca_bancos = buscaDiferencaSaldoFinalBancos(st.session_state.usuario, st.session_state.ano)
                 with st.expander("Dados com diferença nos saldos finais:"):
                     for linha in diferenca_bancos:
                         st.write(f"Ficha: {linha[0]} Fonte de Recurso: {linha[1]} -  Saldo Final no CTB: {locale.currency(linha[2], grouping=True, symbol=False)} - Saldo Final no Balancete: {locale.currency(linha[3], grouping=True, symbol=False)}")
                     
                 # Exibe Conciliacao Bancaria
-                concilicacao_bancos = buscaValoresConciliacaoBancaria(usuario, ano_arquivo_AM)
+                concilicacao_bancos = buscaValoresConciliacaoBancaria(st.session_state.usuario, st.session_state.ano)
                 if concilicacao_bancos:
                     with st.expander("Informações de Conciliação Bancária"):
                         for linha in concilicacao_bancos:
@@ -377,7 +380,7 @@ if tudoOK:
         ######## DADOS EMPENHOS ############
         st.subheader(":red[Valores Empenhados:]")
 
-        empenhos = confereValoresEmpenhados(usuario, ano_arquivo_AM)
+        empenhos = confereValoresEmpenhados(st.session_state.usuario, st.session_state.ano)
         if empenhos:
             saldo_am_formatado = locale.currency(empenhos[0][0], grouping=True, symbol=False)
             saldo_bal_formatado = locale.currency(empenhos[0][1], grouping=True, symbol=False)
@@ -406,7 +409,7 @@ if tudoOK:
             else:
                 # Exibe os dados da diferença
                 st.warning("Os valores dos arquivos EMP e Contabilizados no Balancete são diferentes: ⚠️")
-                diferenca_empenhos = buscaDiferencaValoresEmpenhados(usuario, ano_arquivo_AM)
+                diferenca_empenhos = buscaDiferencaValoresEmpenhados(st.session_state.usuario, st.session_state.ano)
                 with st.expander("Dados com diferença nos saldos finais:"):
                     for linha in diferenca_empenhos:
                         st.write(f"Funcional: {linha[0]} {linha[1]} {linha[2]} {linha[3]} {linha[4]} {linha[5]} {linha[6]} {linha[7]} {linha[8]} -  EMP: {locale.currency(linha[9], grouping=True, symbol=False)} - Balancete: {locale.currency(linha[10], grouping=True, symbol=False)}")
@@ -418,7 +421,7 @@ if tudoOK:
         ######## DADOS RECEITAS ############
         st.subheader(":red[Valores de Receitas:]")
 
-        receitas = confereValoresReceitas(usuario, ano_arquivo_AM)
+        receitas = confereValoresReceitas(st.session_state.usuario, st.session_state.ano)
         if receitas:
             saldo_rec_formatado = locale.currency(receitas[0][0], grouping=True, symbol=False)
             saldo_bal_formatado = locale.currency(receitas[0][1], grouping=True, symbol=False)
@@ -447,7 +450,7 @@ if tudoOK:
             else:
                 # Exibe os dados da diferença
                 st.warning("Os valores dos arquivos REC e Contabilizados no Balancete são diferentes: ⚠️")
-                diferenca_receitas = buscaDiferencaValoresReceitas(usuario, ano_arquivo_AM)
+                diferenca_receitas = buscaDiferencaValoresReceitas(st.session_state.usuario, st.session_state.ano)
                 with st.expander("Dados com diferença nos saldos finais:"):
                     for linha in diferenca_receitas:
                         st.write(f"Receita: {linha[0]} - Fonte de Recurso: {linha[1]} -  REC: {locale.currency(linha[2], grouping=True, symbol=False)} - Balancete: {locale.currency(linha[3], grouping=True, symbol=False)}")

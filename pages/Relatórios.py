@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 from ConsultasSQL import *
-from VariaveisGlobais import usuarioGlobal, anoGlobal
 from funcoes import *
 
 
@@ -17,6 +16,7 @@ if 'cod_municipio_AM' not in st.session_state:
     st.session_state.cod_orgao = None
     st.session_state.mes = None
     st.session_state.ano = None
+    st.session_state.usuario = None
 
 if st.session_state.cod_municipio_AM:
     st.sidebar.subheader(":red[Dados de Importação:]")
@@ -24,6 +24,7 @@ if st.session_state.cod_municipio_AM:
     st.sidebar.write(f"Código Orgão: {st.session_state.cod_orgao}")
     st.sidebar.write(f"Mês: {st.session_state.mes}")
     st.sidebar.write(f"Ano: {st.session_state.ano}")
+    st.sidebar.write(f"Usuário: {st.session_state.usuario}")
 
 st.subheader("Relatórios", divider='rainbow')
 
@@ -35,7 +36,7 @@ st.divider()
 
 if st.button("Imprimir"):
     if relatorios == 'Analítico de Despesa':
-        dados = relatorioAnaliticoEmpenho(usuarioGlobal, st.session_state.ano)
+        dados = relatorioAnaliticoEmpenho(st.session_state.usuario, st.session_state.ano)
 
         # Exibe os dados em uma tabela
         if dados:
@@ -54,7 +55,7 @@ if st.button("Imprimir"):
             st.write('Nenhum dado encontrado para os parâmetros inseridos.')
 
     elif relatorios == 'Movimentos Por Fonte':
-        dados = totalizaMovimentosPorFonte(usuarioGlobal, anoGlobal)
+        dados = totalizaMovimentosPorFonte(st.session_state.usuario, st.session_state.ano)
 
         # Exibe os dados em uma tabela
         if dados:
