@@ -1,12 +1,14 @@
 import streamlit as st
 from funcoes import *
+from streamlit_extras.app_logo import add_logo
 
 st.set_page_config(
     layout="wide",
     initial_sidebar_state="collapsed"
 )
 
-esconde_objetos_streamlit(st)
+
+init(st)
 
 if 'cod_municipio_AM' not in st.session_state:
     st.session_state.cod_municipio_AM = None

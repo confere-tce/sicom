@@ -8,13 +8,15 @@ from ConsultasSQL import confereSaldoFinalBancos, buscaDiferencaSaldoFinalBancos
 from sqlalchemy import create_engine
 from zipfile import ZipFile
 import VariaveisGlobais
+from streamlit_extras.metric_cards import style_metric_cards
+from streamlit_extras.add_vertical_space import add_vertical_space
 
 st.set_page_config(
     layout="wide",
     initial_sidebar_state="collapsed"
 )
 
-esconde_objetos_streamlit(st)
+init(st)
 
 if 'cod_municipio_AM' not in st.session_state:
     st.session_state.cod_municipio_AM = None
@@ -137,7 +139,7 @@ st.divider()
 if tudoOK:
     if st.button("Processar os arquivos", type="primary"):
 
-        usuario = 'USUARIO'  # teste, depois pegar o usuario logado
+        usuario = 'RANZATTI'  # teste, depois pegar o usuario logado
 
         # deletando informaçoes da tabela
         connection.delete(usuario)
@@ -319,16 +321,23 @@ if tudoOK:
             diferenca = abs(bancos[0][0] - bancos[0][1] )
 
             col1, col2, col3 = st.columns(3)
-            with col1:
-                st.write("Saldo Final no CTB")   
-                st.write(f"R$ {saldo_am_formatado}")
-            with col2:
-                st.write("Saldos Contabilizados no Balancete")
-                st.write(f"R$ {saldo_bal_formatado}")
-            with col3:
-                if diferenca > 0:
-                    st.write("Diferença encontrada")
-                    st.write(f"R$ {locale.currency(diferenca, grouping=True, symbol=False)}")
+            col1.metric(label="Saldo Final no CTB", value=saldo_am_formatado)
+            col2.metric(label="Saldos Contabilizados no Balancete", value=saldo_bal_formatado)
+            if diferenca > 0:
+                col3.metric(label="Diferença encontrada", value=locale.currency(diferenca, grouping=True, symbol=False))
+            style_metric_cards(background_color="back", border_left_color="gray")
+
+
+            # with col1:
+            #     st.write("Saldo Final no CTB")   
+            #     st.write(f"R$ {saldo_am_formatado}")
+            # with col2:
+            #     st.write("Saldos Contabilizados no Balancete")
+            #     st.write(f"R$ {saldo_bal_formatado}")
+            # with col3:
+            #     if diferenca > 0:
+            #         st.write("Diferença encontrada")
+            #         st.write(f"R$ {locale.currency(diferenca, grouping=True, symbol=False)}")
 
             if bancos[0][0] == bancos[0][1]:
                 st.success("Os valores dos arquivos CTB e Contas Bancárias do BALANCETE são iguais: ✅")
@@ -375,16 +384,22 @@ if tudoOK:
             diferenca = abs(empenhos[0][0] - empenhos[0][1] )
             
             col1, col2, col3 = st.columns(3)
-            with col1:
-                st.write("Valores Empenhados")
-                st.write(f"R$ {saldo_am_formatado}")
-            with col2:
-                st.write("Valores Contabilizados no Balancete")
-                st.write(f"R$ {saldo_bal_formatado}")
-            with col3:
-                if diferenca > 0:
-                    st.write("Diferença encontrada")
-                    st.write(f"R$ {locale.currency(diferenca, grouping=True, symbol=False)}")
+            col1.metric(label="Valores Empenhados", value=saldo_am_formatado)
+            col2.metric(label="Valores Contabilizados no Balancete", value=saldo_bal_formatado)
+            if diferenca > 0:
+                col3.metric(label="Diferença encontrada", value=locale.currency(diferenca, grouping=True, symbol=False))
+            style_metric_cards(background_color="back", border_left_color="gray")
+
+            # with col1:
+            #     st.write("Valores Empenhados")
+            #     st.write(f"R$ {saldo_am_formatado}")
+            # with col2:
+            #     st.write("Valores Contabilizados no Balancete")
+            #     st.write(f"R$ {saldo_bal_formatado}")
+            # with col3:
+            #     if diferenca > 0:
+            #         st.write("Diferença encontrada")
+            #         st.write(f"R$ {locale.currency(diferenca, grouping=True, symbol=False)}")
             
             if empenhos[0][0] == empenhos[0][1]:
                 st.success("Os valores dos arquivos EMP e Contabilizados no Balancete são iguais: ✅")
@@ -410,16 +425,22 @@ if tudoOK:
             diferenca = abs(receitas[0][0] - receitas[0][1] )
 
             col1, col2, col3 = st.columns(3)
-            with col1:
-                st.write("Valores Receita")
-                st.write(f"R$: {saldo_rec_formatado}")
-            with col2:
-                st.write("Valores Contabilizados no Balancete")
-                st.write(f"R$ {saldo_bal_formatado}")
-            with col3:
-                if diferenca > 0:
-                    st.write("Diferença encontrada")
-                    st.write(f"R$ {locale.currency(diferenca, grouping=True, symbol=False)}")
+            col1.metric(label="Valores Receita", value=saldo_am_formatado)
+            col2.metric(label="Valores Contabilizados no Balancete", value=saldo_bal_formatado)
+            if diferenca > 0:
+                col3.metric(label="Diferença encontrada", value=locale.currency(diferenca, grouping=True, symbol=False))
+            style_metric_cards(background_color="back", border_left_color="gray")
+
+            # with col1:
+            #     st.write("Valores Receita")
+            #     st.write(f"R$: {saldo_rec_formatado}")
+            # with col2:
+            #     st.write("Valores Contabilizados no Balancete")
+            #     st.write(f"R$ {saldo_bal_formatado}")
+            # with col3:
+            #     if diferenca > 0:
+            #         st.write("Diferença encontrada")
+            #         st.write(f"R$ {locale.currency(diferenca, grouping=True, symbol=False)}")
 
             if receitas[0][0] == receitas[0][1]:
                 st.success("Os valores dos arquivos REC e Contabilizados no Balancete são iguais: ✅")

@@ -10,7 +10,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-esconde_objetos_streamlit(st)
+init(st)
 
 if 'cod_municipio_AM' not in st.session_state:
     st.session_state.cod_municipio_AM = None

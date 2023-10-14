@@ -6,7 +6,30 @@ from io import BytesIO
 from reportlab.lib.pagesizes import letter, landscape, A4, A3, portrait
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle
 from reportlab.lib import colors
+from streamlit_extras.app_logo import add_logo
 
+
+def init(st):
+    hide_menu = """
+        <style>
+        #MainMenu{
+            visibility: hidden;
+        }
+
+        .stDeployButton{
+            visibility: hidden;
+        }
+
+        footer{
+            visibility: hidden;
+        }
+        </style>
+        """
+    st.markdown(hide_menu, unsafe_allow_html=True)
+
+    add_logo(
+        "https://www.tce.mg.gov.br/Content/images/logo-tcemg.png"
+    )
 
 def criar_pasta_temporaria():
 
@@ -124,20 +147,3 @@ def exportar_excel(df, filename):
         print(f'Ocorreu um erro ao exportar para Excel: {str(e)}')
 
 
-def esconde_objetos_streamlit(st):
-    hide_menu = """
-        <style>
-        #MainMenu{
-            visibility: hidden;
-        }
-
-        .stDeployButton{
-            visibility: hidden;
-        }
-
-        footer{
-            visibility: hidden;
-        }
-        </style>
-        """
-    st.markdown(hide_menu, unsafe_allow_html=True)
