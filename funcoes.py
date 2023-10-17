@@ -11,11 +11,6 @@ from streamlit_extras.app_logo import add_logo
 
 def init(st):
 
-    st.set_page_config(
-        layout="wide",
-        initial_sidebar_state="expanded"
-    )
-
     hide_menu = """
         <style>
         #MainMenu{

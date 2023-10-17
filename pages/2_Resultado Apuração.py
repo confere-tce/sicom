@@ -9,12 +9,6 @@ from st_aggrid import AgGrid
 
 init(st)
 
-def custom_css(column_name):
-    return {
-        "selector": f".ag-cell-{column_name}",
-        "rule": "text-align: right;",
-    }
-
 st.subheader("Resultado da Apuração", divider='rainbow')
 
 locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')
