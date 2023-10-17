@@ -60,7 +60,6 @@ ano_arquivo_AM = ano_arquivo_Bal = None
 cod_municipio_AM = cod_municipio_BAL = None
 cod_orgao_AM = cod_orgao_BAL = None
 mes_AM = mes_BAL = None
-usuario = None
 
 col1, col2 = st.columns(2)
 with col1:
