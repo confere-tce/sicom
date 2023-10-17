@@ -8,11 +8,11 @@ from ConsultasSQL import confereSaldoFinalBancos, buscaDiferencaSaldoFinalBancos
 from sqlalchemy import create_engine
 from zipfile import ZipFile
 from streamlit_extras.metric_cards import style_metric_cards
-from streamlit_extras.add_vertical_space import add_vertical_space
+from streamlit_extras.switch_page_button import switch_page
 
 st.set_page_config(
     layout="wide",
-    initial_sidebar_state="collapsed"
+    initial_sidebar_state="expanded"
 )
 
 init(st)
@@ -25,16 +25,19 @@ if 'cod_municipio_AM' not in st.session_state:
     st.session_state.usuario = None
 
 if st.session_state.cod_municipio_AM:
-    st.sidebar.subheader(":red[Dados de Importação:]")
-    st.sidebar.write(f"Código Município: {st.session_state.cod_municipio_AM}")
-    st.sidebar.write(f"Código Orgão: {st.session_state.cod_orgao}")
-    st.sidebar.write(f"Mês: {st.session_state.mes}")
-    st.sidebar.write(f"Ano: {st.session_state.ano}")
-    st.sidebar.write(f"Usuário: {st.session_state.usuario}")
+    texto = f"""
+        :red[Dados de Importação:] \n
+        Código Município: {st.session_state.cod_municipio_AM} \n
+        Código Orgão: {st.session_state.cod_orgao} \n
+        Mês: {st.session_state.mes} \n
+        Ano: {st.session_state.ano} \n
+        Usuário: {st.session_state.usuario}
+    """
+    st.sidebar.info(texto)
 
-# usuario = 'USER'  # RANZATTI, teste, depois pegar o usuario logado
-usuario = 'USER1'  # GUSTAVO, teste, depois pegar o usuario logado
-st.session_state.usuario = usuario
+# 'USER'  # RANZATTI, teste, depois pegar o usuario logado
+# 'USER1'  # GUSTAVO, teste, depois pegar o usuario logado
+st.session_state.usuario = 'USER1'
 
 
 st.subheader("Importação dos arquivos Acompanhamento Mensal (AM) e Balancete", divider='rainbow')
@@ -146,7 +149,7 @@ if tudoOK:
     if st.button("Processar os arquivos", type="primary"):
 
         # deletando informaçoes da tabela
-        connection.delete(usuario)
+        connection.delete(st.session_state.usuario)
 
         # criando pasta temporaria e mandando o arquivo zip pra pasta
         pasta_temp = criar_pasta_temporaria()
@@ -239,7 +242,7 @@ if tudoOK:
                     df.insert(0, 'ano', ano_arquivo_AM)
                     df.insert(0, 'arquivo', nome_arquivo)
                     df.insert(0, 'modulo', "AM")
-                    df.insert(0, 'usuario', usuario)
+                    df.insert(0, 'usuario', st.session_state.usuario)
 
                     df.to_sql('tce_sicom', engine,
                               if_exists='append', index=False)
@@ -292,7 +295,7 @@ if tudoOK:
                     df.insert(0, 'ano', ano_arquivo_Bal)
                     df.insert(0, 'arquivo', nome_arquivo)
                     df.insert(0, 'modulo', "BAL")
-                    df.insert(0, 'usuario', usuario)
+                    df.insert(0, 'usuario', st.session_state.usuario)
 
                     df.to_sql('tce_sicom', engine,
                               if_exists='append', index=False)
@@ -305,155 +308,4 @@ if tudoOK:
 
         my_bar_BAL.empty()
 
-########################################################################################################################################################################################
-###################################################################################### RESULTADOS ######################################################################################
-########################################################################################################################################################################################
-
-        st.subheader("Resultado da Apuração", divider='rainbow')
-
-        locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')
-
-        ######## DADOS BANCÁRIOS ############
-        st.subheader(":red[Contas Bancárias:]")
-
-        bancos = confereSaldoFinalBancos(st.session_state.usuario, st.session_state.ano)
-        if bancos:
-            saldo_am_formatado = locale.currency(bancos[0][0], grouping=True, symbol=False)
-            saldo_bal_formatado = locale.currency(bancos[0][1], grouping=True, symbol=False)
-            diferenca = abs(bancos[0][0] - bancos[0][1] )
-
-            col1, col2, col3 = st.columns(3)
-            col1.metric(label="Saldo Final no CTB", value=saldo_am_formatado)
-            col2.metric(label="Saldos Contabilizados no Balancete", value=saldo_bal_formatado)
-            if diferenca > 0:
-                col3.metric(label="Diferença encontrada", value=locale.currency(diferenca, grouping=True, symbol=False))
-            style_metric_cards(background_color="back", border_left_color="gray")
-
-
-            # with col1:
-            #     st.write("Saldo Final no CTB")   
-            #     st.write(f"R$ {saldo_am_formatado}")
-            # with col2:
-            #     st.write("Saldos Contabilizados no Balancete")
-            #     st.write(f"R$ {saldo_bal_formatado}")
-            # with col3:
-            #     if diferenca > 0:
-            #         st.write("Diferença encontrada")
-            #         st.write(f"R$ {locale.currency(diferenca, grouping=True, symbol=False)}")
-
-            if bancos[0][0] == bancos[0][1]:
-                st.success("Os valores dos arquivos CTB e Contas Bancárias do BALANCETE são iguais: ✅")
-            else:
-                # Exibe os dados da diferença
-                st.warning("Os valores dos arquivos CTB e Contas Bancárias do BALANCETE são diferentes: ⚠️")
-
-                diferenca_bancos = buscaDiferencaSaldoFinalBancos(st.session_state.usuario, st.session_state.ano)
-                with st.expander("Dados com diferença nos saldos finais:"):
-                    for linha in diferenca_bancos:
-                        st.write(f"Ficha: {linha[0]} Fonte de Recurso: {linha[1]} -  Saldo Final no CTB: {locale.currency(linha[2], grouping=True, symbol=False)} - Saldo Final no Balancete: {locale.currency(linha[3], grouping=True, symbol=False)}")
-                    
-                # Exibe Conciliacao Bancaria
-                concilicacao_bancos = buscaValoresConciliacaoBancaria(st.session_state.usuario, st.session_state.ano)
-                if concilicacao_bancos:
-                    with st.expander("Informações de Conciliação Bancária"):
-                        for linha in concilicacao_bancos:
-                            if linha[1] == '1':
-                                st.write(f"Ficha: {linha[0]} Entradas contabilizadas e não consideradas no extrato bancário: {locale.currency(linha[2], grouping=True, symbol=False)}")
-                            elif linha[1] == '2':
-                                st.write(f"Ficha: {linha[0]} Saídas contabilizadas e não consideradas no extrato bancário: {locale.currency(linha[2], grouping=True, symbol=False)}")
-                            elif linha[1] == '3':
-                                st.write(f"Ficha: {linha[0]} Entradas não consideradas pela contabilidade: {locale.currency(linha[2], grouping=True, symbol=False)}")
-                            elif linha[1] == '4':
-                                st.write(f"Ficha: {linha[0]} Saídas não consideradas pela contabilidade: {locale.currency(linha[2], grouping=True, symbol=False)}")
-                            else:
-                                st.write("Valor desconhecido")
-                else:
-                    st.warning("Foi encontrado diferença entre o CTB e Balancete e não possui informação de Conciliação Bancária: ⚠️")
-        else:
-            st.error("Não foram encontrados dados para o usuário e ano fornecidos ✅")
-
-        
-
-        st.divider()
-
-        ######## DADOS EMPENHOS ############
-        st.subheader(":red[Valores Empenhados:]")
-
-        empenhos = confereValoresEmpenhados(st.session_state.usuario, st.session_state.ano)
-        if empenhos:
-            saldo_am_formatado = locale.currency(empenhos[0][0], grouping=True, symbol=False)
-            saldo_bal_formatado = locale.currency(empenhos[0][1], grouping=True, symbol=False)
-            diferenca = abs(empenhos[0][0] - empenhos[0][1] )
-            
-            col1, col2, col3 = st.columns(3)
-            col1.metric(label="Valores Empenhados", value=saldo_am_formatado)
-            col2.metric(label="Valores Contabilizados no Balancete", value=saldo_bal_formatado)
-            if diferenca > 0:
-                col3.metric(label="Diferença encontrada", value=locale.currency(diferenca, grouping=True, symbol=False))
-            style_metric_cards(background_color="back", border_left_color="gray")
-
-            # with col1:
-            #     st.write("Valores Empenhados")
-            #     st.write(f"R$ {saldo_am_formatado}")
-            # with col2:
-            #     st.write("Valores Contabilizados no Balancete")
-            #     st.write(f"R$ {saldo_bal_formatado}")
-            # with col3:
-            #     if diferenca > 0:
-            #         st.write("Diferença encontrada")
-            #         st.write(f"R$ {locale.currency(diferenca, grouping=True, symbol=False)}")
-            
-            if empenhos[0][0] == empenhos[0][1]:
-                st.success("Os valores dos arquivos EMP e Contabilizados no Balancete são iguais: ✅")
-            else:
-                # Exibe os dados da diferença
-                st.warning("Os valores dos arquivos EMP e Contabilizados no Balancete são diferentes: ⚠️")
-                diferenca_empenhos = buscaDiferencaValoresEmpenhados(st.session_state.usuario, st.session_state.ano)
-                with st.expander("Dados com diferença nos saldos finais:"):
-                    for linha in diferenca_empenhos:
-                        st.write(f"Funcional: {linha[0]} {linha[1]} {linha[2]} {linha[3]} {linha[4]} {linha[5]} {linha[6]} {linha[7]} {linha[8]} -  EMP: {locale.currency(linha[9], grouping=True, symbol=False)} - Balancete: {locale.currency(linha[10], grouping=True, symbol=False)}")
-        else:
-            st.error("Não foram encontrados dados para o usuário e ano fornecidos ✅")
-
-        st.divider()
-
-        ######## DADOS RECEITAS ############
-        st.subheader(":red[Valores de Receitas:]")
-
-        receitas = confereValoresReceitas(st.session_state.usuario, st.session_state.ano)
-        if receitas:
-            saldo_rec_formatado = locale.currency(receitas[0][0], grouping=True, symbol=False)
-            saldo_bal_formatado = locale.currency(receitas[0][1], grouping=True, symbol=False)
-            diferenca = abs(receitas[0][0] - receitas[0][1] )
-
-            col1, col2, col3 = st.columns(3)
-            col1.metric(label="Valores Receita", value=saldo_am_formatado)
-            col2.metric(label="Valores Contabilizados no Balancete", value=saldo_bal_formatado)
-            if diferenca > 0:
-                col3.metric(label="Diferença encontrada", value=locale.currency(diferenca, grouping=True, symbol=False))
-            style_metric_cards(background_color="back", border_left_color="gray")
-
-            # with col1:
-            #     st.write("Valores Receita")
-            #     st.write(f"R$: {saldo_rec_formatado}")
-            # with col2:
-            #     st.write("Valores Contabilizados no Balancete")
-            #     st.write(f"R$ {saldo_bal_formatado}")
-            # with col3:
-            #     if diferenca > 0:
-            #         st.write("Diferença encontrada")
-            #         st.write(f"R$ {locale.currency(diferenca, grouping=True, symbol=False)}")
-
-            if receitas[0][0] == receitas[0][1]:
-                st.success("Os valores dos arquivos REC e Contabilizados no Balancete são iguais: ✅")
-            else:
-                # Exibe os dados da diferença
-                st.warning("Os valores dos arquivos REC e Contabilizados no Balancete são diferentes: ⚠️")
-                diferenca_receitas = buscaDiferencaValoresReceitas(st.session_state.usuario, st.session_state.ano)
-                with st.expander("Dados com diferença nos saldos finais:"):
-                    for linha in diferenca_receitas:
-                        st.write(f"Receita: {linha[0]} - Fonte de Recurso: {linha[1]} -  REC: {locale.currency(linha[2], grouping=True, symbol=False)} - Balancete: {locale.currency(linha[3], grouping=True, symbol=False)}")
-        else:
-            st.error("Não foram encontrados dados para o usuário e ano fornecidos ✅")
-
-        st.divider()
+        switch_page("resultado apuração")
