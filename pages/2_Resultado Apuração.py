@@ -7,11 +7,6 @@ from streamlit_extras.metric_cards import style_metric_cards
 import pandas as pd
 from st_aggrid import AgGrid
 
-st.set_page_config(
-    layout="wide",
-    initial_sidebar_state="expanded"
-)
-
 init(st)
 
 def custom_css(column_name):

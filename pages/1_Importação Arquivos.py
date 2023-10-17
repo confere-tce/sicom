@@ -9,11 +9,6 @@ from zipfile import ZipFile
 from streamlit_extras.metric_cards import style_metric_cards
 from streamlit_extras.switch_page_button import switch_page
 
-st.set_page_config(
-    layout="wide",
-    initial_sidebar_state="expanded"
-)
-
 init(st)
 
 st.subheader("Importação dos arquivos Acompanhamento Mensal (AM) e Balancete", divider='rainbow')
