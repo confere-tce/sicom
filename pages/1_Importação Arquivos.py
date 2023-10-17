@@ -2,7 +2,6 @@ import streamlit as st
 import connection
 import os
 import pandas as pd
-import locale
 from funcoes import *
 from ConsultasSQL import confereSaldoFinalBancos, buscaDiferencaSaldoFinalBancos, confereValoresEmpenhados, buscaDiferencaValoresEmpenhados, confereValoresReceitas, buscaDiferencaValoresReceitas, buscaValoresConciliacaoBancaria
 from sqlalchemy import create_engine
@@ -16,29 +15,6 @@ st.set_page_config(
 )
 
 init(st)
-
-if 'cod_municipio_AM' not in st.session_state:
-    st.session_state.cod_municipio_AM = None
-    st.session_state.cod_orgao = None
-    st.session_state.mes = None
-    st.session_state.ano = None
-    st.session_state.usuario = None
-
-if st.session_state.cod_municipio_AM:
-    texto = f"""
-        :red[Dados de Importação:] \n
-        Código Município: {st.session_state.cod_municipio_AM} \n
-        Código Orgão: {st.session_state.cod_orgao} \n
-        Mês: {st.session_state.mes} \n
-        Ano: {st.session_state.ano} \n
-        Usuário: {st.session_state.usuario}
-    """
-    st.sidebar.info(texto)
-
-# 'USER'  # RANZATTI, teste, depois pegar o usuario logado
-# 'USER1'  # GUSTAVO, teste, depois pegar o usuario logado
-st.session_state.usuario = 'USER1'
-
 
 st.subheader("Importação dos arquivos Acompanhamento Mensal (AM) e Balancete", divider='rainbow')
 
