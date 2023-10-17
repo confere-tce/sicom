@@ -4,13 +4,17 @@ from funcoes import *
 from ConsultasSQL import *
 from streamlit_extras.metric_cards import style_metric_cards
 import pandas as pd
-from st_aggrid import AgGrid
+from st_aggrid import AgGrid, ColumnsAutoSizeMode
 
 init(st)
 
 st.subheader("Resultado da Apuração", divider='rainbow')
 
 locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')
+
+custom_css = {
+    ".ag-cell": {"text-align": "right"  },
+} 
 
 if st.session_state.cod_municipio_AM:
     ######## DADOS BANCÁRIOS ############
@@ -39,11 +43,10 @@ if st.session_state.cod_municipio_AM:
             valores = buscaDiferencaSaldoFinalBancos(st.experimental_user, st.session_state.ano)
             with st.expander("Dados com diferença nos saldos finais:"):
                 for linha in valores:
-                    ficha.append(linha[0])
+                    ficha.append(str(linha[0]))
                     fonteRecurso.append(linha[1])
                     saldo_Final_CTB.append(locale.currency(linha[2], grouping=True, symbol=False))
                     saldo_Final_BAL.append(locale.currency(linha[3], grouping=True, symbol=False))
-                    # diferenca.append(float(linha[2] - linha[3]))
                     diferenca.append(locale.currency(linha[2] - linha[3], grouping=True, symbol=False))
 
                 df=pd.DataFrame({
@@ -57,7 +60,7 @@ if st.session_state.cod_municipio_AM:
                
                 # st.dataframe(df, use_container_width=True)
 
-                AgGrid(df)
+                AgGrid(df, columns_auto_size_mode=ColumnsAutoSizeMode.FIT_ALL_COLUMNS_TO_VIEW, custom_css=custom_css,allow_unsafe_jscode=True)
                 
             # Exibe Conciliacao Bancaria
             concilicacao_bancos = buscaValoresConciliacaoBancaria(st.experimental_user, st.session_state.ano)
@@ -124,7 +127,7 @@ if st.session_state.cod_municipio_AM:
                 
                 # st.dataframe(df, use_container_width=True)                
 
-                AgGrid(df)
+                AgGrid(df, columns_auto_size_mode=ColumnsAutoSizeMode.FIT_ALL_COLUMNS_TO_VIEW, custom_css=custom_css,allow_unsafe_jscode=True)
     else:
         st.error("Não foram encontrados dados para o usuário e ano fornecidos ✅")
 
@@ -171,7 +174,8 @@ if st.session_state.cod_municipio_AM:
                     })
                 
                 # st.dataframe(df, use_container_width=True)      
-                AgGrid(df)
+
+                AgGrid(df, columns_auto_size_mode=ColumnsAutoSizeMode.FIT_ALL_COLUMNS_TO_VIEW, custom_css=custom_css,allow_unsafe_jscode=True)
     else:
         st.error("Não foram encontrados dados para o usuário e ano fornecidos ✅")
 
