@@ -1,12 +1,10 @@
 import streamlit as st
-import connection
+import connection as conn
 import os
 import pandas as pd
 from funcoes import *
-from ConsultasSQL import confereSaldoFinalBancos, buscaDiferencaSaldoFinalBancos, confereValoresEmpenhados, buscaDiferencaValoresEmpenhados, confereValoresReceitas, buscaDiferencaValoresReceitas, buscaValoresConciliacaoBancaria
 from sqlalchemy import create_engine
 from zipfile import ZipFile
-from streamlit_extras.metric_cards import style_metric_cards
 from streamlit_extras.switch_page_button import switch_page
 
 init(st)
@@ -120,7 +118,7 @@ if tudoOK:
     if st.button("Processar os arquivos", type="primary"):
 
         # deletando informaçoes da tabela
-        connection.delete(st.session_state.usuario)
+        conn.delete(st.experimental_user)
 
         # criando pasta temporaria e mandando o arquivo zip pra pasta
         pasta_temp = criar_pasta_temporaria()
@@ -213,7 +211,7 @@ if tudoOK:
                     df.insert(0, 'ano', ano_arquivo_AM)
                     df.insert(0, 'arquivo', nome_arquivo)
                     df.insert(0, 'modulo', "AM")
-                    df.insert(0, 'usuario', st.session_state.usuario)
+                    df.insert(0, 'usuario', st.experimental_user)
 
                     df.to_sql('tce_sicom', engine,
                               if_exists='append', index=False)
@@ -266,7 +264,7 @@ if tudoOK:
                     df.insert(0, 'ano', ano_arquivo_Bal)
                     df.insert(0, 'arquivo', nome_arquivo)
                     df.insert(0, 'modulo', "BAL")
-                    df.insert(0, 'usuario', st.session_state.usuario)
+                    df.insert(0, 'usuario', st.experimental_user)
 
                     df.to_sql('tce_sicom', engine,
                               if_exists='append', index=False)

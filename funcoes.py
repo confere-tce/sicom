@@ -38,7 +38,7 @@ def init(st):
         st.session_state.cod_orgao = None
         st.session_state.mes = None
         st.session_state.ano = None
-        st.session_state.usuario = None
+        st.experimental_user = None
 
     if st.session_state.cod_municipio_AM:
         texto = f"""
@@ -47,7 +47,7 @@ def init(st):
             Código Orgão: {st.session_state.cod_orgao} \n
             Mês: {st.session_state.mes} \n
             Ano: {st.session_state.ano} \n
-            Usuário: {st.session_state.usuario}
+            Usuário: {st.experimental_user}
         """
         st.sidebar.info(texto)
 

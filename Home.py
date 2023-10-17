@@ -1,7 +1,5 @@
 import streamlit as st
-from funcoes import *
-from streamlit_extras.app_logo import add_logo
-
+from funcoes import init
 
 st.set_page_config(
     layout="wide",
@@ -12,4 +10,4 @@ init(st)
 
 st.subheader("Home", divider='rainbow')
 
-st.session_state.usuario = st.sidebar.text_input('Usuário', 'USER')
+st.experimental_user = st.sidebar.text_input('Usuário', 'USER')

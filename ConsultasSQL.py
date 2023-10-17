@@ -263,31 +263,15 @@ def buscaDiferencaValoresEmpenhados(usuario, ano):
 
     # Consulta SQL
     consulta = """
-        SELECT X.SEQ4, X.SEQ5, X.SEQ6, X.SEQ7, X.SEQ8, X.SEQ9, X.SEQ10, X.SEQ11, X.SEQ13, SUM(X.EMPENHOS) AS AM, SUM(X.EMPENHADO) AS BALANCETE
-        FROM (
-        SELECT ANO, USUARIO, SEQ4, SEQ5, SEQ6, SEQ7, SEQ8, SEQ9, SEQ10, SEQ11, SEQ13, SUM(CAST(REPLACE(SEQ18, ',', '.') AS NUMERIC)) AS EMPENHADO, 0 AS EMPENHOS
-        FROM TCE_SICOM 
-        WHERE ARQUIVO = 'BALANCETE'
-        AND SEQ1 = '30'
-        AND SUBSTRING(SEQ2,1,7) LIKE '6221301'
-        GROUP BY ANO, USUARIO, SEQ4, SEQ5, SEQ6, SEQ7, SEQ8, SEQ9, SEQ10, SEQ11, SEQ13
-
-        UNION ALL
-
-        SELECT A.ANO, A.USUARIO, A.SEQ2, A.SEQ3, A.SEQ4, A.SEQ5, A.SEQ6, A.SEQ7, A.SEQ8, A.SEQ9, B.SEQ4, 0, SUM(CAST(REPLACE(B.SEQ6, ',', '.') AS NUMERIC)) AS EMPENHOS
-        FROM TCE_SICOM A
-        JOIN TCE_SICOM B ON (A.USUARIO = B.USUARIO AND A.ANO  = B.ANO AND A.MODULO = B.MODULO AND A.ARQUIVO = B.ARQUIVO AND B.SEQ1 = '11' AND A.SEQ11 = B.SEQ3)
-        WHERE A.ARQUIVO = 'EMP' 
-        AND A.SEQ1 = '10'
-        GROUP BY A.ANO, A.USUARIO, A.SEQ2, A.SEQ3, A.SEQ4, A.SEQ5, A.SEQ6, A.SEQ7, A.SEQ8, A.SEQ9, B.SEQ4) X
-        WHERE 1=1
-        AND X.USUARIO = %s
-        AND X.ANO = %s
-        GROUP BY X.SEQ4, X.SEQ5, X.SEQ6, X.SEQ7, X.SEQ8, X.SEQ9, X.SEQ10, X.SEQ11, X.SEQ13
-        HAVING SUM(X.EMPENHADO) != SUM(X.EMPENHOS)
+        SELECT
+            SEQ4, SEQ5, SEQ6, SEQ7, SEQ8, SEQ9, SEQ10, SEQ11, SEQ13, AM, BALANCETE
+        FROM
+            VW_BUSCADIFERENCAVALORESEMPENHADOS_2023
+        WHERE
+            USUARIO = %s
     """
 
-    cursor.execute(consulta, (usuario, ano,))
+    cursor.execute(consulta, (usuario,))
     dados = cursor.fetchall()
 
     cursor.close()

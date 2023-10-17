@@ -18,7 +18,7 @@ if st.session_state.cod_municipio_AM:
 
     if st.button("Imprimir"):
         if relatorios == 'Analítico de Despesa':
-            dados = relatorioAnaliticoEmpenho(st.session_state.usuario, st.session_state.ano)
+            dados = relatorioAnaliticoEmpenho(st.experimental_user, st.session_state.ano)
 
             # Exibe os dados em uma tabela
             if dados:
@@ -37,7 +37,7 @@ if st.session_state.cod_municipio_AM:
                 st.write('Nenhum dado encontrado para os parâmetros inseridos.')
 
         elif relatorios == 'Movimentos Por Fonte':
-            dados = totalizaMovimentosPorFonte(st.session_state.usuario, st.session_state.ano)
+            dados = totalizaMovimentosPorFonte(st.experimental_user, st.session_state.ano)
 
             # Exibe os dados em uma tabela
             if dados:
