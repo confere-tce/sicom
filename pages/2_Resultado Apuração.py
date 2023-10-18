@@ -4,17 +4,13 @@ from funcoes import *
 from ConsultasSQL import *
 from streamlit_extras.metric_cards import style_metric_cards
 import pandas as pd
-from st_aggrid import AgGrid, ColumnsAutoSizeMode
+from st_aggrid import AgGrid
 
 init(st)
 
 st.subheader("Resultado da Apuração", divider='rainbow')
 
 locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')
-
-custom_css = {
-    ".ag-cell": {"text-align": "right"  },
-} 
 
 if st.session_state.cod_municipio_AM:
     ######## DADOS BANCÁRIOS ############
@@ -29,10 +25,10 @@ if st.session_state.cod_municipio_AM:
         style_metric_cards(background_color="back", border_left_color="gray")
 
         if bancos[0][0] == bancos[0][1]:
-            st.success("Os valores dos arquivos CTB e Contas Bancárias do BALANCETE são iguais: ✅")
+            st.success("Os valores dos arquivos CTB de Contas Bancárias do BALANCETE de Contas Bancárias são iguais: ✅")
         else:
             # Exibe os dados da diferença
-            st.warning("Os valores dos arquivos CTB e Contas Bancárias do BALANCETE são diferentes: ⚠️")
+            st.warning("Os valores dos arquivos CTB de Contas Bancárias do BALANCETE de Contas Bancárias são diferentes: ⚠️")
 
             ficha = []
             fonteRecurso = []
@@ -43,10 +39,11 @@ if st.session_state.cod_municipio_AM:
             valores = buscaDiferencaSaldoFinalBancos(st.experimental_user, st.session_state.ano)
             with st.expander("Dados com diferença nos saldos finais:"):
                 for linha in valores:
-                    ficha.append(str(linha[0]))
+                    ficha.append(linha[0])
                     fonteRecurso.append(linha[1])
                     saldo_Final_CTB.append(locale.currency(linha[2], grouping=True, symbol=False))
                     saldo_Final_BAL.append(locale.currency(linha[3], grouping=True, symbol=False))
+                    # diferenca.append(float(linha[2] - linha[3]))
                     diferenca.append(locale.currency(linha[2] - linha[3], grouping=True, symbol=False))
 
                 df=pd.DataFrame({
@@ -60,27 +57,115 @@ if st.session_state.cod_municipio_AM:
                
                 # st.dataframe(df, use_container_width=True)
 
-                AgGrid(df, columns_auto_size_mode=ColumnsAutoSizeMode.FIT_ALL_COLUMNS_TO_VIEW, custom_css=custom_css,allow_unsafe_jscode=True)
-                
-            # Exibe Conciliacao Bancaria
-            concilicacao_bancos = buscaValoresConciliacaoBancaria(st.experimental_user, st.session_state.ano)
-            if concilicacao_bancos:
-                with st.expander("Informações de Conciliação Bancária"):
-                    for linha in concilicacao_bancos:
-                        if linha[1] == '1':
-                            st.write(f"Ficha: {linha[0]} Entradas contabilizadas e não consideradas no extrato bancário: {locale.currency(linha[2], grouping=True, symbol=False)}")
-                        elif linha[1] == '2':
-                            st.write(f"Ficha: {linha[0]} Saídas contabilizadas e não consideradas no extrato bancário: {locale.currency(linha[2], grouping=True, symbol=False)}")
-                        elif linha[1] == '3':
-                            st.write(f"Ficha: {linha[0]} Entradas não consideradas pela contabilidade: {locale.currency(linha[2], grouping=True, symbol=False)}")
-                        elif linha[1] == '4':
-                            st.write(f"Ficha: {linha[0]} Saídas não consideradas pela contabilidade: {locale.currency(linha[2], grouping=True, symbol=False)}")
-                        else:
-                            st.write("Valor desconhecido")
-            else:
-                st.warning("Foi encontrado diferença entre o CTB e Balancete e não possui informação de Conciliação Bancária: ⚠️")
+                AgGrid(df)
     else:
-        st.error("Não foram encontrados dados para o usuário e ano fornecidos ✅")
+        st.success("Não foram encontrados dados Saldo de Bancários para o usuário e ano fornecidos ✅")
+
+    bancos = confereSaldoFinalBancosNaoCompoe(st.experimental_user, st.session_state.ano)
+    if bancos:
+        col1, col2, col3 = st.columns(3)
+        col1.metric(label="Saldo Final no CTB não Compõe Saldo de Caixa", value=locale.currency(bancos[0][0], grouping=True, symbol=False))
+        col2.metric(label="Saldos Contabilizados no Balancete não Compõe Saldo de Caixa", value=locale.currency(bancos[0][1], grouping=True, symbol=False))
+        col3.metric(label="Diferença encontrada", value=locale.currency(bancos[0][0] - bancos[0][1], grouping=True, symbol=False))
+        style_metric_cards(background_color="back", border_left_color="gray")
+
+        if bancos[0][0] == bancos[0][1]:
+            st.success("Os valores dos arquivos CTB não Compõe Saldo de Caixa e Contas Bancárias não Compõe Saldo de Caixa do BALANCETE são iguais: ✅")
+        else:
+            # Exibe os dados da diferença
+            st.warning("Os valores dos arquivos CTB não Compõe Saldo de Caixa e Contas Bancárias não Compõe Saldo de Caixa do BALANCETE são diferentes: ⚠️")
+
+            ficha = []
+            fonteRecurso = []
+            saldo_Final_CTB = []
+            saldo_Final_BAL = []
+            diferenca = []
+
+            valores = buscaDiferencaSaldoFinalBancosNaoCompoe(st.experimental_user, st.session_state.ano)
+            with st.expander("Dados com diferença nos saldos finais:"):
+                for linha in valores:
+                    ficha.append(linha[0])
+                    fonteRecurso.append(linha[1])
+                    saldo_Final_CTB.append(locale.currency(linha[2], grouping=True, symbol=False))
+                    saldo_Final_BAL.append(locale.currency(linha[3], grouping=True, symbol=False))
+                    # diferenca.append(float(linha[2] - linha[3]))
+                    diferenca.append(locale.currency(linha[2] - linha[3], grouping=True, symbol=False))
+
+                df=pd.DataFrame({
+                    "Ficha":ficha,
+                    "Fonte Recurso":fonteRecurso,
+                    "Saldo Final no CTB":saldo_Final_CTB,
+                    "Saldo Final no Balancete":saldo_Final_BAL,
+                    "Diferença":diferenca,
+                    })
+                
+               
+                # st.dataframe(df, use_container_width=True)
+
+                AgGrid(df)
+    else:
+        st.success("Não foram encontrados dados de Valores que não Compõe Saldo de Caixa para o usuário e ano fornecidos ✅")
+
+    bancos = confereSaldoFinalBancosRestituiveis(st.experimental_user, st.session_state.ano)
+    if bancos:
+        col1, col2, col3 = st.columns(3)
+        col1.metric(label="Saldo Final no CTB Valores Restituíveis", value=locale.currency(bancos[0][0], grouping=True, symbol=False))
+        col2.metric(label="Saldos Contabilizados no Balancete Valores Restituíveis", value=locale.currency(bancos[0][1], grouping=True, symbol=False))
+        col3.metric(label="Diferença encontrada", value=locale.currency(bancos[0][0] - bancos[0][1], grouping=True, symbol=False))
+        style_metric_cards(background_color="back", border_left_color="gray")
+
+        if bancos[0][0] == bancos[0][1]:
+            st.success("Os valores dos arquivos CTB Valores Restituíveis e Contas Bancárias Valores Restituíveis do BALANCETE são iguais: ✅")
+        else:
+            # Exibe os dados da diferença
+            st.warning("Os valores dos arquivos CTB Valores Restituíveis e Contas Bancárias Valores Restituíveis do BALANCETE são diferentes: ⚠️")
+
+            ficha = []
+            fonteRecurso = []
+            saldo_Final_CTB = []
+            saldo_Final_BAL = []
+            diferenca = []
+
+            valores = vw_BuscaDiferencaSaldoFinalBancosRestituiveis(st.experimental_user, st.session_state.ano)
+            with st.expander("Dados com diferença nos saldos finais:"):
+                for linha in valores:
+                    ficha.append(linha[0])
+                    fonteRecurso.append(linha[1])
+                    saldo_Final_CTB.append(locale.currency(linha[2], grouping=True, symbol=False))
+                    saldo_Final_BAL.append(locale.currency(linha[3], grouping=True, symbol=False))
+                    # diferenca.append(float(linha[2] - linha[3]))
+                    diferenca.append(locale.currency(linha[2] - linha[3], grouping=True, symbol=False))
+
+                df=pd.DataFrame({
+                    "Ficha":ficha,
+                    "Fonte Recurso":fonteRecurso,
+                    "Saldo Final no CTB":saldo_Final_CTB,
+                    "Saldo Final no Balancete":saldo_Final_BAL,
+                    "Diferença":diferenca,
+                    })
+                
+               
+                # st.dataframe(df, use_container_width=True)
+
+                AgGrid(df)          
+    else:
+        st.success("Não foram encontrados dados de Valores Restituíveis para o usuário e ano fornecidos ✅")
+
+    # Exibe Conciliacao Bancaria
+    concilicacao_bancos = buscaValoresConciliacaoBancaria(st.experimental_user, st.session_state.ano)
+    if concilicacao_bancos:
+        with st.expander("Informações de Conciliação Bancária"):
+            for linha in concilicacao_bancos:
+                if linha[1] == '1':
+                    st.write(f"Ficha: {linha[0]} Entradas contabilizadas e não consideradas no extrato bancário: {locale.currency(linha[2], grouping=True, symbol=False)}")
+                elif linha[1] == '2':
+                    st.write(f"Ficha: {linha[0]} Saídas contabilizadas e não consideradas no extrato bancário: {locale.currency(linha[2], grouping=True, symbol=False)}")
+                elif linha[1] == '3':
+                    st.write(f"Ficha: {linha[0]} Entradas não consideradas pela contabilidade: {locale.currency(linha[2], grouping=True, symbol=False)}")
+                elif linha[1] == '4':
+                    st.write(f"Ficha: {linha[0]} Saídas não consideradas pela contabilidade: {locale.currency(linha[2], grouping=True, symbol=False)}")
+                else:
+                    st.write("Valor desconhecido")
 
 
     ######## DADOS EMPENHOS ############
@@ -127,7 +212,7 @@ if st.session_state.cod_municipio_AM:
                 
                 # st.dataframe(df, use_container_width=True)                
 
-                AgGrid(df, columns_auto_size_mode=ColumnsAutoSizeMode.FIT_ALL_COLUMNS_TO_VIEW, custom_css=custom_css,allow_unsafe_jscode=True)
+                AgGrid(df)
     else:
         st.error("Não foram encontrados dados para o usuário e ano fornecidos ✅")
 
@@ -174,8 +259,7 @@ if st.session_state.cod_municipio_AM:
                     })
                 
                 # st.dataframe(df, use_container_width=True)      
-
-                AgGrid(df, columns_auto_size_mode=ColumnsAutoSizeMode.FIT_ALL_COLUMNS_TO_VIEW, custom_css=custom_css,allow_unsafe_jscode=True)
+                AgGrid(df)
     else:
         st.error("Não foram encontrados dados para o usuário e ano fornecidos ✅")
 
