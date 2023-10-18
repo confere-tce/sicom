@@ -206,6 +206,52 @@ def confereSaldoFinalBancos(usuario, ano):
 
     return dados
 
+def confereSaldoFinalBancosNaoCompoe(usuario, ano):
+
+    cursor = connection.conn.cursor()
+
+    # Consulta SQL
+    if ano == 2023:
+        consulta = """
+            SELECT
+                SALDOFINALCTB,
+                SALDOFINALBAL
+            FROM
+                vw_ConfereSaldoFinalBancosNaoCompoe_2023
+            WHERE
+                USUARIO = %s
+        """
+
+    cursor.execute(consulta, (usuario,))
+    dados = cursor.fetchall()
+
+    cursor.close()
+
+    return dados
+
+def confereSaldoFinalBancosRestituiveis(usuario, ano):
+
+    cursor = connection.conn.cursor()
+
+    # Consulta SQL
+    if ano == 2023:
+        consulta = """
+            SELECT
+                SALDOFINALCTB,
+                SALDOFINALBAL
+            FROM
+                vw_ConfereSaldoFinalBancosRestituiveis_2023
+            WHERE
+                USUARIO = %s
+        """
+
+    cursor.execute(consulta, (usuario,))
+    dados = cursor.fetchall()
+
+    cursor.close()
+
+    return dados
+
 
 def buscaDiferencaSaldoFinalBancos(usuario, ano):
 
@@ -221,6 +267,56 @@ def buscaDiferencaSaldoFinalBancos(usuario, ano):
                 SALDOFINALBAL
             FROM
                 VW_BUSCADIFERENCASALDOFINALBANCOS_2023
+            WHERE
+                USUARIO = %s
+        """
+
+    cursor.execute(consulta, (usuario,))
+    dados = cursor.fetchall()
+
+    cursor.close()
+
+    return dados
+
+def buscaDiferencaSaldoFinalBancosNaoCompoe(usuario, ano):
+
+    cursor = connection.conn.cursor()
+
+    # Consulta SQL
+    if ano == 2023:
+        consulta = """
+            SELECT
+                FICHA,
+                FONTERECURSO,
+                SALDOFINALCTB,
+                SALDOFINALBAL
+            FROM
+                vw_BuscaDiferencaSaldoFinalBancosNaoCompoe_2023
+            WHERE
+                USUARIO = %s
+        """
+
+    cursor.execute(consulta, (usuario,))
+    dados = cursor.fetchall()
+
+    cursor.close()
+
+    return dados
+
+def vw_BuscaDiferencaSaldoFinalBancosRestituiveis(usuario, ano):
+
+    cursor = connection.conn.cursor()
+
+    # Consulta SQL
+    if ano == 2023:
+        consulta = """
+            SELECT
+                FICHA,
+                FONTERECURSO,
+                SALDOFINALCTB,
+                SALDOFINALBAL
+            FROM
+                vw_BuscaDiferencaSaldoFinalBancosRestituiveis_2023
             WHERE
                 USUARIO = %s
         """
