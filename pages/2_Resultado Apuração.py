@@ -5,6 +5,7 @@ from ConsultasSQL import *
 from streamlit_extras.metric_cards import style_metric_cards
 import pandas as pd
 from st_aggrid import AgGrid, ColumnsAutoSizeMode
+from st_aggrid.grid_options_builder import GridOptionsBuilder
 
 init(st)
 
@@ -15,6 +16,9 @@ locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')
 custom_css = {
     ".ag-cell": {"text-align": "right"  },
 } 
+
+total_linhas_pagina_ag_grid = 20
+
 if st.session_state.cod_municipio_AM:
     ######## DADOS BANCÁRIOS ############
     st.subheader(":red[Contas Bancárias:]")
@@ -43,10 +47,9 @@ if st.session_state.cod_municipio_AM:
             with st.expander("Dados com diferença nos saldos finais:"):
                 for linha in valores:
                     ficha.append(str(linha[0]))
-                    fonteRecurso.append(linha[1])
+                    fonteRecurso.append('{}.{}.{}'.format(linha[1][:1], linha[1][1:4], linha[1][4:]))
                     saldo_Final_CTB.append(locale.currency(linha[2], grouping=True, symbol=False))
                     saldo_Final_BAL.append(locale.currency(linha[3], grouping=True, symbol=False))
-					
                     diferenca.append(locale.currency(linha[2] - linha[3], grouping=True, symbol=False))
 
                 df=pd.DataFrame({
@@ -57,10 +60,17 @@ if st.session_state.cod_municipio_AM:
                     "Diferença":diferenca,
                     })
                 
-               
-                # st.dataframe(df, use_container_width=True)
+                gb = GridOptionsBuilder.from_dataframe(df)
+                gb.configure_pagination(paginationAutoPageSize=False, paginationPageSize=total_linhas_pagina_ag_grid)
+                gb.configure_column('Ficha', minWidth=120, maxWidth=120)
+                gb.configure_column('Fonte Recurso', minWidth=120, maxWidth=120)
+                gridoption = gb.build()
 
-                AgGrid(df, columns_auto_size_mode=ColumnsAutoSizeMode.FIT_ALL_COLUMNS_TO_VIEW, custom_css=custom_css,allow_unsafe_jscode=True)
+                AgGrid(df, 
+                       gridOptions=gridoption,
+                       columns_auto_size_mode=ColumnsAutoSizeMode.FIT_ALL_COLUMNS_TO_VIEW, 
+                       custom_css=custom_css,
+                       allow_unsafe_jscode=True)
     else:
         st.success("Não foram encontrados dados Saldo de Bancários para o usuário e ano fornecidos ✅")
 
@@ -88,10 +98,9 @@ if st.session_state.cod_municipio_AM:
             with st.expander("Dados com diferença nos saldos finais:"):
                 for linha in valores:
                     ficha.append(linha[0])
-                    fonteRecurso.append(linha[1])
+                    fonteRecurso.append('{}.{}.{}'.format(linha[1][:1], linha[1][1:4], linha[1][4:]))
                     saldo_Final_CTB.append(locale.currency(linha[2], grouping=True, symbol=False))
                     saldo_Final_BAL.append(locale.currency(linha[3], grouping=True, symbol=False))
-                    # diferenca.append(float(linha[2] - linha[3]))
                     diferenca.append(locale.currency(linha[2] - linha[3], grouping=True, symbol=False))
 
                 df=pd.DataFrame({
@@ -101,11 +110,18 @@ if st.session_state.cod_municipio_AM:
                     "Saldo Final no Balancete":saldo_Final_BAL,
                     "Diferença":diferenca,
                     })
-                
                
-                # st.dataframe(df, use_container_width=True)
+                gb = GridOptionsBuilder.from_dataframe(df)
+                gb.configure_pagination(paginationAutoPageSize=False, paginationPageSize=total_linhas_pagina_ag_grid)
+                gb.configure_column('Ficha', minWidth=120, maxWidth=120)
+                gb.configure_column('Fonte Recurso', minWidth=120, maxWidth=120)
+                gridoption = gb.build()
 
-                AgGrid(df, columns_auto_size_mode=ColumnsAutoSizeMode.FIT_ALL_COLUMNS_TO_VIEW, custom_css=custom_css,allow_unsafe_jscode=True)
+                AgGrid(df, 
+                       gridOptions=gridoption,
+                       columns_auto_size_mode=ColumnsAutoSizeMode.FIT_ALL_COLUMNS_TO_VIEW, 
+                       custom_css=custom_css, 
+                       allow_unsafe_jscode=True)
     else:
         st.success("Não foram encontrados dados de Valores que não Compõe Saldo de Caixa para o usuário e ano fornecidos ✅")
 
@@ -133,10 +149,9 @@ if st.session_state.cod_municipio_AM:
             with st.expander("Dados com diferença nos saldos finais:"):
                 for linha in valores:
                     ficha.append(linha[0])
-                    fonteRecurso.append(linha[1])
+                    fonteRecurso.append('{}.{}.{}'.format(linha[1][:1], linha[1][1:4], linha[1][4:]))
                     saldo_Final_CTB.append(locale.currency(linha[2], grouping=True, symbol=False))
                     saldo_Final_BAL.append(locale.currency(linha[3], grouping=True, symbol=False))
-                    # diferenca.append(float(linha[2] - linha[3]))
                     diferenca.append(locale.currency(linha[2] - linha[3], grouping=True, symbol=False))
 
                 df=pd.DataFrame({
@@ -146,11 +161,18 @@ if st.session_state.cod_municipio_AM:
                     "Saldo Final no Balancete":saldo_Final_BAL,
                     "Diferença":diferenca,
                     })
-                
-               
-                # st.dataframe(df, use_container_width=True)
+            
+                gb = GridOptionsBuilder.from_dataframe(df)
+                gb.configure_pagination(paginationAutoPageSize=False, paginationPageSize=total_linhas_pagina_ag_grid)
+                gb.configure_column('Ficha', minWidth=120, maxWidth=120)
+                gb.configure_column('Fonte Recurso', minWidth=120, maxWidth=120)
+                gridoption = gb.build()
 
-                AgGrid(df)          
+                AgGrid(df, 
+                       gridOptions=gridoption,
+                       columns_auto_size_mode=ColumnsAutoSizeMode.FIT_ALL_COLUMNS_TO_VIEW, 
+                       custom_css=custom_css, 
+                       allow_unsafe_jscode=True)
     else:
         st.success("Não foram encontrados dados de Valores Restituíveis para o usuário e ano fornecidos ✅")
 
@@ -200,7 +222,7 @@ if st.session_state.cod_municipio_AM:
             with st.expander("Dados com diferença nos saldos finais:"):
                 for linha in valores:
                     funcional.append(f"{linha[0]}.{linha[1]}.{linha[2]}.{linha[3]}.{linha[4]}.{linha[5]}.{linha[6]}.{linha[7]}")
-                    fonteRecurso.append(linha[8])
+                    fonteRecurso.append('{}.{}.{}'.format(linha[8][:1], linha[8][1:4], linha[8][4:]))
                     saldo_EMP_AM.append(locale.currency(linha[9], grouping=True, symbol=False))
                     saldo_Final_BAL.append(locale.currency(linha[10], grouping=True, symbol=False))
                     diferenca.append(locale.currency(linha[9] - linha[10], grouping=True, symbol=False))
@@ -213,9 +235,17 @@ if st.session_state.cod_municipio_AM:
                     "Diferença":diferenca,
                     })
                 
-                # st.dataframe(df, use_container_width=True)                
+                gb = GridOptionsBuilder.from_dataframe(df)
+                gb.configure_pagination(paginationAutoPageSize=False, paginationPageSize=total_linhas_pagina_ag_grid)
+                gb.configure_column('Funcional', minWidth=250, maxWidth=250)
+                gb.configure_column('Fonte Recurso', minWidth=120, maxWidth=120)
+                gridoption = gb.build()         
 
-                AgGrid(df, columns_auto_size_mode=ColumnsAutoSizeMode.FIT_ALL_COLUMNS_TO_VIEW, custom_css=custom_css,allow_unsafe_jscode=True)
+                AgGrid(df, 
+                       gridOptions=gridoption,
+                       columns_auto_size_mode=ColumnsAutoSizeMode.FIT_ALL_COLUMNS_TO_VIEW, 
+                       custom_css=custom_css, 
+                       allow_unsafe_jscode=True)
     else:
         st.error("Não foram encontrados dados para o usuário e ano fornecidos ✅")
 
@@ -247,22 +277,31 @@ if st.session_state.cod_municipio_AM:
             valores = buscaDiferencaValoresReceitas(st.experimental_user, st.session_state.ano)
             with st.expander("Dados com diferença nos saldos finais:"):
                 for linha in valores:
-                    receita.append(linha[0])
-                    fonteRecurso.append(linha[1])
+                    receita.append('{}.{}.{}.{}.{}.{}.{}'.format(linha[0][:1], linha[0][1:2], linha[0][2:3], linha[0][3:4], linha[0][4:6], linha[0][6:7], linha[0][7:]))
+                    fonteRecurso.append('{}.{}.{}'.format(linha[1][:1], linha[1][1:4], linha[1][4:]))
                     saldo_REC_AM.append(locale.currency(linha[2], grouping=True, symbol=False))
                     saldo_Final_BAL.append(locale.currency(linha[3], grouping=True, symbol=False))
                     diferenca.append(locale.currency(linha[2] - linha[3], grouping=True, symbol=False))
 
-                    df=pd.DataFrame({
-                        "Receita":receita,
-                        "Fonte Recurso":fonteRecurso,
-                        "Total Receita":saldo_REC_AM,
-                        "Saldo Final no Balancete":saldo_Final_BAL,
-                        "Diferença":diferenca,
-                    })
+                df=pd.DataFrame({
+                    "Receita":receita,
+                    "Fonte Recurso":fonteRecurso,
+                    "Total Receita":saldo_REC_AM,
+                    "Saldo Final no Balancete":saldo_Final_BAL,
+                    "Diferença":diferenca,
+                })
+
+                gb = GridOptionsBuilder.from_dataframe(df)
+                gb.configure_pagination(paginationAutoPageSize=False, paginationPageSize=total_linhas_pagina_ag_grid)
+                gb.configure_column('Receita', minWidth=120, maxWidth=120)
+                gb.configure_column('Fonte Recurso', minWidth=120, maxWidth=120)
+                gridoption = gb.build()
                 
-                # st.dataframe(df, use_container_width=True)      
-                AgGrid(df, columns_auto_size_mode=ColumnsAutoSizeMode.FIT_ALL_COLUMNS_TO_VIEW, custom_css=custom_css,allow_unsafe_jscode=True)
+                AgGrid(df,
+                       gridOptions=gridoption,
+                       columns_auto_size_mode=ColumnsAutoSizeMode.FIT_ALL_COLUMNS_TO_VIEW, 
+                       custom_css=custom_css,
+                       allow_unsafe_jscode=True)
     else:
         st.error("Não foram encontrados dados para o usuário e ano fornecidos ✅")
 

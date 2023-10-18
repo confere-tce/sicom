@@ -447,3 +447,37 @@ def buscaValoresConciliacaoBancaria(usuario, ano):
     cursor.close()
 
     return dados
+
+def graficoEmpenhoReceita(usuario, ano):
+
+    cursor = connection.conn.cursor()
+
+    # Consulta SQL
+    if ano == 2023:
+        consulta = """
+            SELECT SUM(X.EMP) as EMP, SUM(X.REC) as REC
+            FROM (
+            SELECT
+                AM AS EMP, 0 AS REC
+            FROM
+                VW_CONFEREVALORESEMPENHADOS_2023
+            WHERE
+                USUARIO = %s
+                
+            UNION ALL
+                
+            SELECT
+                0, REALREC
+            FROM
+                VW_CONFEREVALORESRECEITAS_2023
+            WHERE
+                USUARIO = %s
+            ) X 
+        """
+
+    cursor.execute(consulta, (usuario, usuario,))
+    dados = cursor.fetchall()
+
+    cursor.close()
+
+    return dados

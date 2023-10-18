@@ -32,6 +32,8 @@ def init(st):
         "https://www.tce.mg.gov.br/Content/images/logo-tcemg.png"
     )
 
+    meses_extenso = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"]
+
     # criando e populando as variaveis de sessão
     if 'cod_municipio_AM' not in st.session_state:
         st.session_state.cod_municipio_AM = None
@@ -45,7 +47,7 @@ def init(st):
             :red[Dados de Importação:] \n
             Código Município: {st.session_state.cod_municipio_AM} \n
             Código Orgão: {st.session_state.cod_orgao} \n
-            Mês: {st.session_state.mes} \n
+            Mês: {st.session_state.mes} ({meses_extenso[int(st.session_state.mes)-1].capitalize()})\n
             Ano: {st.session_state.ano} \n
             Usuário: {st.experimental_user}
         """
