@@ -481,3 +481,29 @@ def graficoEmpenhoReceita(usuario, ano):
     cursor.close()
 
     return dados
+
+
+def graficoEmpenhoDiarios(usuario, ano):
+
+    cursor = connection.conn.cursor()
+
+    # Consulta SQL
+    if ano == 2023:
+        consulta = """
+            SELECT SUBSTRING(a.SEQ12,1,2) || '-' || SUBSTRING(a.SEQ12,3,2) || '-' || SUBSTRING(a.SEQ12,5) as data  , SUM(CAST(REPLACE(B.SEQ6, ',', '.') AS NUMERIC)) AS EMPENHOS
+            FROM TCE_SICOM A
+            JOIN TCE_SICOM B ON (A.USUARIO = B.USUARIO AND A.ANO  = B.ANO AND A.MODULO = B.MODULO AND A.ARQUIVO = B.ARQUIVO AND B.SEQ1 = '11' AND A.SEQ11 = B.SEQ3)
+            WHERE A.ARQUIVO = 'EMP' 
+            AND A.SEQ1 = '10'
+            and A.USUARIO = %s
+            and A.ANO= %s
+            group by a.seq12
+            order by 1
+        """
+
+    cursor.execute(consulta, (usuario, ano,))
+    dados = cursor.fetchall()
+
+    cursor.close()
+
+    return dados
