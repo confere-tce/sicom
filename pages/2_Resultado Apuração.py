@@ -182,13 +182,13 @@ if st.session_state.cod_municipio_AM:
         with st.expander("Informações de Conciliação Bancária"):
             for linha in concilicacao_bancos:
                 if linha[1] == '1':
-                    st.write(f"Ficha: {linha[0]} Entradas contabilizadas e não consideradas no extrato bancário: {locale.currency(linha[2], grouping=True, symbol=False)}")
+                    st.write(f"Ficha: {linha[0]} - Entradas contabilizadas e não consideradas no extrato bancário: {locale.currency(linha[2], grouping=True, symbol=False)}")
                 elif linha[1] == '2':
-                    st.write(f"Ficha: {linha[0]} Saídas contabilizadas e não consideradas no extrato bancário: {locale.currency(linha[2], grouping=True, symbol=False)}")
+                    st.write(f"Ficha: {linha[0]} - Saídas contabilizadas e não consideradas no extrato bancário: {locale.currency(linha[2], grouping=True, symbol=False)}")
                 elif linha[1] == '3':
-                    st.write(f"Ficha: {linha[0]} Entradas não consideradas pela contabilidade: {locale.currency(linha[2], grouping=True, symbol=False)}")
+                    st.write(f"Ficha: {linha[0]} - Entradas não consideradas pela contabilidade: {locale.currency(linha[2], grouping=True, symbol=False)}")
                 elif linha[1] == '4':
-                    st.write(f"Ficha: {linha[0]} Saídas não consideradas pela contabilidade: {locale.currency(linha[2], grouping=True, symbol=False)}")
+                    st.write(f"Ficha: {linha[0]} - Saídas não consideradas pela contabilidade: {locale.currency(linha[2], grouping=True, symbol=False)}")
                 else:
                     st.write("Valor desconhecido")
 

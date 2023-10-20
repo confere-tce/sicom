@@ -9,6 +9,8 @@ init(st)
 
 st.subheader("Gráficos", divider='rainbow')
 
+# st.markdown("<style>.block-container {background-color: #fffff0; border-radius: 20px; box-shadow: 3px 3px 3px #888;}</style>", unsafe_allow_html=True)
+
 if st.session_state.cod_municipio_AM:
     ##### EMPENHOS #####
     with st.container():

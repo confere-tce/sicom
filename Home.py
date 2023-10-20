@@ -13,4 +13,7 @@ init(st)
 
 st.subheader("Home", divider='rainbow')
 
-st.experimental_user = st.sidebar.text_input('Usuário', 'USER')
+with open('senha.txt') as f:
+    senha = f.read()
+
+st.experimental_user = senha
